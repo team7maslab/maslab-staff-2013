@@ -1,7 +1,3 @@
-/*
- * Switch test program
- */
-
 // pins 2 and 4 on the Mega don't work
 
 // motor stuff
