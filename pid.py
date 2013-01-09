@@ -12,5 +12,5 @@ class pid:
             TOL = constants.speedTOL
         elif (state == "angle"):
             TOL = angleTOL
-        # comper input to (sensor-input)
+        # compare input to (sensor-input)
         

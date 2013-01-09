@@ -2,7 +2,7 @@
 # used for getting the robot to move around the field
 # doesn't handle ball capture/release
 
-import arduino, constants, time
+import arduino, constants, time, sensors
 # need to import sensor feeds
 
 ####    make all of these closed-loop
