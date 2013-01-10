@@ -23,6 +23,7 @@ butPressR = 150;    # right motor speed for pressing button
 
 # time parameters
 butPressTime = 0.5  # time required for a button press
+pidTimeStep = 0.1   # time step used in PID control
 
 # tolerances
 speedTOL = 0.1;     # not sure what unit this is, number was just picked randomly for now
