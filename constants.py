@@ -16,15 +16,24 @@ irL = 6;    # left IR sensor
 irR = 5;    # right IR sensor
 
 # motor parameters
-cruiseL = 200;      # normal left motor speed
-cruiseR = 200;      # normal right motor speed
+cruiseL = 200;      # initial left motor speed
+cruiseR = 200;      # initial right motor speed
 butPressL = 150;    # left motor speed for pressing button
 butPressR = 150;    # right motor speed for pressing button
 
 # time parameters
-butPressTime = 0.5  # time required for a button press
-pidTimeStep = 0.1   # time step used in PID control
+gameTime = 180;     # 3-minute game period
+endGame = 150;      # end game entered when there are 30 seconds left in the game
+buttonDelay = 30;   # delay between button presses
+butPressTime = 0.5; # time required for a button press
+pidTimeStep = 0.1;  # time step used in PID control
 
-# tolerances
-speedTOL = 0.1;     # not sure what unit this is, number was just picked randomly for now
-angleTOL = 5;       # degrees
+# controller gains
+##### need to calibrate all these
+speedKp = 0.1;
+speedKi = 0.1;
+speedKd = 0.1;
+angleKp = 0.1;
+angleKi = 0.1;
+angleKd = 0.1;
+trackingKp = 0.1;

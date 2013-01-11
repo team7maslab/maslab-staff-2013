@@ -20,3 +20,5 @@ class sensor:
             irVal = self.irRight.getValue()
         return irVal
             
+    def vision():
+        # Victor's vision code goes here

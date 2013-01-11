@@ -14,13 +14,18 @@ class pid:
             TOL = constants.speedTOL
         elif (state == "angle"):
             TOL = angleTOL
+        # should probably use these TOL values somehow
 
         error = input - sensor
         self.errorSum = self.errorSum + error
 
         # need to get stuff from timer thread, need to make this
-        errorInt = self.errorSum * (timer.pidStepsElapsed)  # integral error
-        errorDiff = (self.prevError - error)/tStep          # differential error
+        if (state == "speed" or state == "angle"):
+            errorInt = self.errorSum * (timer.pidStepsElapsed)  # integral error
+            errorDiff = (self.prevError - error)/tStep          # differential error
+        else:
+            errorInt = 0
+            errorDiff = 0
 
         setInput = input + Kp * error + Ki * errorInt - Kd * errorDiff
 
