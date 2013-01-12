@@ -1,82 +1,59 @@
-import serial, subprocess, struct, numpy as np
+import sys
+import serial, time
+sys.path.append("../../lib")
 
-debug = True
-BAUD = 9600
-port = None
+class Arduino:
 
-def connect():
-        global port
+    def __init__(self):
+        self.killedReceived = False
+
+    # Start the connection and the thread that communicates with the arduino
+    def run(self):
+        self.portOpened = self.connect()
+        self.checkPorts()
+
+    # Create the serial connection to the arduino
+    def connect(self):
         print "Connecting"
-        # Loop through possible values of ACMX, and try to connect on each one
-        for i in [5]:
+        names = ['COM3','COM5']
+        for name in names:
             try:
                 # Try to create the serial connection
-                port=serial.Serial(port='COM{0}'.format(i), baudrate=9600, timeout=0.5)
-                if port.isOpen():
+                self.port=serial.Serial(name, baudrate=9600, timeout=0.5)
+                if self.port.isOpen():
                     time.sleep(2) # Wait for Arduino to initialize
-                    print "Connected"
+                    print "Connected on " + name
                     return True
             except:
-                # Some debugging prints
-                print "Arduino not connected on COM{0}".format(i)
+                print "Arduino not connected on " + name
         print "Failed to connect"
         return False
 
-def serialRead(size=1):
-    inp = port.read(size)
-    if (len(inp) < size):
-        return chr(0)
+    def sendData(self):
+        while not self.killedReceived:
+            output = "F"
+            self.port.write(output)
+            finishedReceiving = False
+            while not finishedReceiving:
+                t = self.serialRead()
+                if t == ';':
+                    finishedReceiving = True
+                    
+    def serialRead(self, size=1):
+        inp = self.port.read(size)
+        print inp
+        if (len(inp) < size):
+            return chr(0)
         #while (inp == "/"):
         #    while inp != "\\":
         #        sys.stdout.write(inp)
         #        inp = self.port.read()
         #    inp = self.port.read(size)
-    return inp
+        return inp
 
-def raw_command():
-    global port
-    """Send a command to the arduino and receive a response."""
-    connect()
-    while True:
-        port.write("M")
-    
-    done = False
-    killbot = False
-    
-    while not killbot:
 
-        output = ""
-        output += 'M'
-        port.write("M")
-        print port
-        
-        # while not done:
-            # Read in the mode
-            # print "Reading mode"
-            # mode = serialRead()
-            # print mode
-            # if (mode == chr(0)):
-                # print "Timeout"
-                # break
-            # if (mode == ';'):
-                # done = True
-    
-def get_analog(channel):
-    """Ask for an analog reading."""
-    pass
+ard = Arduino()
+ard.connect()
+ard.sendData()
 
-def is_alive():
-    """Check whether the arduino is responding to commands."""
-    pass
-def get_start_mode():
-    """Returns either IDLE, REGULAR, or AGGRESIVE."""
-    pass
-
-def get_voltage():
-    """Returns voltage on Robot"""
-    pass
-
-connect()
-while True:
-    port.write("M")
 
