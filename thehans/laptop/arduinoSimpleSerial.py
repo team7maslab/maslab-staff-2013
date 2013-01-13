@@ -2,6 +2,8 @@ import serial, time, math
 
 class Arduino:
 
+    port = None
+    
     def __init__(self):
         self.dataSent = False
         self.outputDict = {}
@@ -34,18 +36,22 @@ class Arduino:
         return False
 
     # Sends the data from the computer, and reads the response
-    def packetExchange(self):
-        self.packetCount += 1
+    def packetExchange(self, query=False):
         while not self.dataSent:
-            output = self.formatTransmitData()
+            self.packetCount += 1
+            if query == True:
+                output = "Q;"
+            else:
+                output = self.formatTransmitData()
             if self.debug: print "Transmitting Data: " + output
 
-            ## DEBUGGING:
+            ##debug:
             output = 'M'
             
             self.port.write(output)
-
             self.serialRead()
+            if self.debug: print "Received Data: " + str(self.receivedDict)
+            
             self.dataSent = True
 
         self.dataSent = False
@@ -72,9 +78,8 @@ class Arduino:
                     tempData.append(self.port.read(length))
                 self.receivedDict[inp] = tempData
             self.receivedDict['PK'] = self.packetCount
-            if inp == ";":
+            if inp == ";" or inp == "":
                 dataEnded = True
-        print self.receivedDict
         return inp
 
     # Motor controls
@@ -92,7 +97,35 @@ class Arduino:
             self.outputDict['R'] = int(heading*10)
         else:
             self.outputDict['L'] = int(math.fabs(heading*10))
-            
+
+    # Helix controls
+    def helixCommand(self, mode):
+        """0 is off, 1 is on"""
+        self.outputDict['H'] = int(mode)
+        
+    # Intake controls
+    def intakeCommand(self, mode):
+        """0 is off, 1 is on"""
+        self.outputDict['G'] = int(mode)
+
+    # Arm controls
+    def armCommand(self, mode):
+        """0 is the arm up, 1 is the arm down"""
+        self.outputDict['A'] = int(mode)
+
+    # Enemy hopper roller controls
+    def enemyCommand(self, mode):
+        """0 is off, 1 is on"""
+        self.outputDict['E'] = int(mode)
+        
+    # Starts the Helix and Intake Roller
+    def startCommand(self):
+        """Starts the main robot functions"""
+        self.helixCommand(1)
+        self.intakeCommand(1)
+        self.armCommand(0)
+        self.enemyCommand(0)
+                
     # Dumps the dictionary that holds the values to be output     
     def flushDictionary(self):
         """Empties the dictionary of values to be transmitted"""
@@ -108,12 +141,13 @@ class Arduino:
             for i in range(len(values)):
                 values[i] = int(values[i])
             return values
-        
-ard = Arduino()
-ard.connect(debug=True)
 
-ard.motorCommand(0.9)
-ard.turnCommand(-0.98)
-ard.packetExchange()
-
-print ard.retrieve('PK')
+   
+## ard = Arduino()
+## ard.connect(debug=True)
+##
+## ard.motorCommand(0.9)
+## ard.turnCommand(-0.98)
+## ard.packetExchange()
+##
+## print ard.retrieve('M')
