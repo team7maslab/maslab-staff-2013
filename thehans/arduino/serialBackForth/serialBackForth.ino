@@ -29,10 +29,11 @@ int dir1 = 11;
 int pwm2 = 12;
 int dir2 = 13;
 
-// ball handling motors
-int roller = 53;
-int helix = 52;
-int arm = 51;
+// ball handling motor indicies
+int intakeInd = 53;
+int enemyRollerInd = 52;
+int helixInd = 51;
+int armInd = 50;
 
 // sensor indicies
 int ir1 = 1;
@@ -45,6 +46,8 @@ int bump2 = 5;
 int ballBump = 6;        // switch index counting the number of balls going up the helix
 String currBumpVal = 'LOW';
 String = 'LOW';
+
+int armServoMaxDegree = 90; // *********** figure out what the actual value of this is
 
 //---- Return String ---------------------
 // The dynamically sized return string
@@ -64,10 +67,6 @@ void writeToRetVal(char c)
 void pid(int inputSpeed, boolean pOnly){
   // ******* PID controller here
   
-  
-  pidMotorSpeeds correctedSpeeds;
-  // ********* correctedSpeeds.leftSpeed = something
-  // ********* correctedSpeeds.rightSpeed = something
   analogWrite(pwm1, corrected.leftSpeed);
   analogWrite(pwn2, corrected.rightSpeed);
 }
@@ -92,20 +91,24 @@ void sendRetVal()
 
 // ??? are we using serialRead()?
 
+int readToInt(){
+  char val;
+  val = serial.read();
+  int intVal = atoi(val)
+  return intVal;
+}
 
-// handlers for different inputs go here
+
 void killAllAction(){
-  // kill all the things
+  // **************************** kill all the things
 }
 
 void queryAction(){
-  // stuff
+  // ***************************** 
 }
 
 void forwardAction(){
-  char go;
-  go = serial.read();    // reading in one char to determine speed
-  int goInt = atoi(go);
+  int goInt = readToInt();
   digitalWrite(dir1, HIGH);
   digitalWrite(dir2, HIGH);
   // *********** need to write PID method to ensure forward motion
@@ -113,9 +116,7 @@ void forwardAction(){
 }
 
 void backwardAction(){
-  char go;
-  go = serial.read();    // reading in one char to determine speed
-  int goInt = atoi(go);
+  int goInt = readToInt();
   digitalWrite(dir1, LOW);
   digitalWrite(dir2, LOW);
   // *********** need to write PID method to ensure backwards motion
@@ -123,9 +124,7 @@ void backwardAction(){
 }
 
 void leftAction(){
-  char go;
-  go = serial.read();    // reading in one char to determine speed
-  int goInt = atoi(go);
+  int goInt = readToInt();
   digitalWrite(dir1, HIGH);
   digitalWrite(dir2, LOW);
   analogWrite(pwm1, goInt);
@@ -133,9 +132,7 @@ void leftAction(){
 }
 
 void rightAction(){
-  char go;
-  go = serial.read();    // reading in one char to determine speed
-  int goInt = atoi(go);
+  int goInt = readToInt();
   digitalWrite(dir1, LOW);
   digitalWrite(dir2, HIGH);
   analogWrite(pwm1, goInt);
@@ -143,15 +140,24 @@ void rightAction(){
 }
 
 void helixAction(){
-  char onOff;
-  onOff = serial.read();  // reading in one char to turn on or off
-  //********************************** stuff
+  int onOff = readToInt();
+  analogWrite(helixInd, 255*onOff);
+}
+
+void intakeAction(){
+  int onOff = readToInt();
+  analogWrite(intakeInd, 255*onOff);
+}
+
+void enemyHopperAction(){
+  int onOff = readToInt();
+  analogWrite(enemyRollerInd, 255*onOff);
 }
 
 void armAction(){
-  char upDown;
+  int upDown;
   upDown = serial.read();  // reading in one char to move up or down
-  // ********************************* stuff
+  analogWrite(armInd, armServoMaxDegree);
 }
 
 void enemyHopperAction(){
