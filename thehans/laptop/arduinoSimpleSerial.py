@@ -1,21 +1,25 @@
-import sys
-import serial, time
-sys.path.append("../../lib")
+import serial, time, math
 
 class Arduino:
 
     def __init__(self):
-        self.killedReceived = False
-
+        self.dataSent = False
+        self.outputDict = {}
+        self.receivedDict = {}
+        self.dataFMT = {'M':(1,1),'K':(2,2)}
+        self.debug = False
+        self.packetCount = 0
+        
     # Start the connection and the thread that communicates with the arduino
     def run(self):
         self.portOpened = self.connect()
         self.checkPorts()
 
     # Create the serial connection to the arduino
-    def connect(self):
-        print "Connecting"
-        names = ['COM3','COM5']
+    def connect(self, debug=False):
+        self.debug = debug
+        if self.debug: print "Connecting..."
+        names = ['COM5','COM6']
         for name in names:
             try:
                 # Try to create the serial connection
@@ -25,35 +29,91 @@ class Arduino:
                     print "Connected on " + name
                     return True
             except:
-                print "Arduino not connected on " + name
-        print "Failed to connect"
+                if self.debug: print "Arduino not connected on " + name
+        if self.debug: print "Failed to connect."
         return False
 
-    def sendData(self):
-        while not self.killedReceived:
-            output = "F"
+    # Sends the data from the computer, and reads the response
+    def packetExchange(self):
+        self.packetCount += 1
+        while not self.dataSent:
+            output = self.formatTransmitData()
+            if self.debug: print "Transmitting Data: " + output
+
+            ## DEBUGGING:
+            output = 'M'
+            
             self.port.write(output)
-            finishedReceiving = False
-            while not finishedReceiving:
-                t = self.serialRead()
-                if t == ';':
-                    finishedReceiving = True
-                    
+
+            self.serialRead()
+            self.dataSent = True
+
+        self.dataSent = False
+        self.flushDictionary()
+
+    # Converts the dictionary of data into the laptop-arduino protocol
+    def formatTransmitData(self):
+        data = ""
+        for key, value in self.outputDict.iteritems():
+            data += key + str(value)
+        return data
+
+    # Read the serial and store the results as a dictionary
     def serialRead(self, size=1):
-        inp = self.port.read(size)
-        print inp
-        if (len(inp) < size):
-            return chr(0)
-        #while (inp == "/"):
-        #    while inp != "\\":
-        #        sys.stdout.write(inp)
-        #        inp = self.port.read()
-        #    inp = self.port.read(size)
+        dataEnded = False
+        self.receivedDict = {}
+        storage = ""
+        while not dataEnded:
+            inp = self.port.read(size)
+            tempData = []
+            if inp in self.dataFMT.keys():
+                numItems,length  = self.dataFMT[inp]
+                for i in range(numItems):
+                    tempData.append(self.port.read(length))
+                self.receivedDict[inp] = tempData
+            self.receivedDict['PK'] = self.packetCount
+            if inp == ";":
+                dataEnded = True
+        print self.receivedDict
         return inp
 
+    # Motor controls
+    def motorCommand(self, speed):
+        """Set the drive motors.  Speeds range from -1.0 to 1.0"""
+        if speed >= 0:
+            self.outputDict['F'] = int(speed*10)
+        else:
+            self.outputDict['B'] = int(math.fabs(speed*10))
 
+    # Turn controls     
+    def turnCommand(self, heading):
+        """Turn in a direction. Headings range from -1.0 to 1.0"""
+        if heading >= 0:
+            self.outputDict['R'] = int(heading*10)
+        else:
+            self.outputDict['L'] = int(math.fabs(heading*10))
+            
+    # Dumps the dictionary that holds the values to be output     
+    def flushDictionary(self):
+        """Empties the dictionary of values to be transmitted"""
+        self.outputDict = {}
+
+    # Request for a value from the Arduino, returns value based on receivedDict
+    def retrieve(self, key):
+        """Retrieves the value for an Arduino input, based on dataFMT"""
+        if key == 'PK':
+            return self.receivedDict['PK']
+        else:
+            values = self.receivedDict[key]
+            for i in range(len(values)):
+                values[i] = int(values[i])
+            return values
+        
 ard = Arduino()
-ard.connect()
-ard.sendData()
+ard.connect(debug=True)
 
+ard.motorCommand(0.9)
+ard.turnCommand(-0.98)
+ard.packetExchange()
 
+print ard.retrieve('PK')
