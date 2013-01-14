@@ -42,6 +42,9 @@ class Eye:
         if mm.m00 > 0:
             x = int(mm.m10/mm.m00)
             y = int(mm.m01/mm.m00)
+        else:
+            x = 0
+            y = 0
         center = (x,y)
         radius = int(math.sqrt(mm.m00/math.pi)/16)
         
@@ -50,7 +53,8 @@ class Eye:
         cv.Circle(thresholded, center, radius, self.VICTOR_ORANGE, 5)
         
         # calculate the relative position of the ball with 0,0 being the center of the frame. tuple of values between -1 and 1
-        relativeCenterX = s(float(x)-float(self.FRAME_WIDTH)/2) / (float(self.FRAME_WIDTH)/2)
+        if self.debug: print "Center of the red ball is: " + str(center)
+        relativeCenterX = (float(x)-float(self.FRAME_WIDTH)/2) / (float(self.FRAME_WIDTH)/2)
         relativeCenterY = (float(y)-float(self.FRAME_HEIGHT)/2) / (float(self.FRAME_HEIGHT)/2)
         relativeCenter = (relativeCenterX, relativeCenterY)
         
@@ -60,13 +64,7 @@ class Eye:
     def showImage(self, frame):
         """debugging tool for outputting the frame as a new window"""
         cv.ShowImage('Camera', frame)    
+        cv.WaitKey(10)
 
 
 
-
-cyclops = Eye(debug=True)
-frame = cyclops.getFrame()
-center, frame = cyclops.findRedBall(frame)
-
-print center
-cyclops.showImage(frame)

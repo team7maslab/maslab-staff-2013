@@ -1,4 +1,4 @@
-import serial, time, math
+import serial, time, math, glob
 
 class Arduino:
 
@@ -21,7 +21,7 @@ class Arduino:
     def connect(self, debug=False):
         self.debug = debug
         if self.debug: print "Connecting..."
-        names = ['COM5','COM6','COM11']
+        names = ['COM5','COM6','COM11','/dev/tty0','/dev/tty1','/dev/tty2', '/dev/ttyACM0']
         for name in names:
             try:
                 # Try to create the serial connection
@@ -33,6 +33,7 @@ class Arduino:
             except:
                 if self.debug: print "Arduino not connected on " + name
         if self.debug: print "Failed to connect."
+        exit()
         return False
 
     # Sends the data from the computer, and reads the response

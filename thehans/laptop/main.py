@@ -1,16 +1,28 @@
 import arduinoSimpleSerial as arduino
-import time
+import time, eye
 
 def run():
 
     #Waiting for button press on robot to denote start
     print 'connected! waiting for button press'
-    mode = 0
-    while mode == 0:
-        ard.packetExchange(query=True)
-        mode = ard.retrieve('M')[0]
-        print mode
-        time.sleep(.02) # check until mode is specified
+    # mode = 0
+    # while mode == 0:
+    #    ard.packetExchange(query=True)
+    #    mode = ard.retrieve('M')[0]
+    #    print mode
+    #    time.sleep(.02) # check until mode is specified
+    
+    cyclop = eye.Eye(debug=True)
+    
+    while True:
+        frame = cyclop.getFrame()
+        (x,y), frame = cyclop.findRedBall(frame)
+        print (x,y)
+        ard.motorCommand(0.5)
+        ard.turnCommand(x)
+        cyclop.showImage(frame)
+        ard.packetExchange()
+        time.sleep(.02)
         
     print 'mode ' + mode + ' initiated'
 
