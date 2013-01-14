@@ -140,7 +140,6 @@ void loop()
       }
     }
 
-
     //------------- WRITE OUT ALL THE SENSOR DATA -----------
 
   }

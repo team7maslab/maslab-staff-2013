@@ -24,10 +24,10 @@
 #define killAll 'Z'      // 0 numbers follow
 
 // wheel motor indicies
-int pwm1 = 10;
-int dir1 = 11;
-int pwm2 = 12;
-int dir2 = 13;
+int pwm1 = 11;
+int dir1 = 12;
+int pwm2 = 13;
+int dir2 = 10;
 
 // ball handling motor indicies
 int intakeInd = 53;
@@ -44,10 +44,30 @@ int bump2 = 5;
 
 // ball counting
 int ballBump = 6;        // switch index counting the number of balls going up the helix
-String currBumpVal = 'LOW';
-String = 'LOW';
-
+int currBumpVal = 0;
+int prevBumpVal = 0;
 int armServoMaxDegree = 90; // *********** figure out what the actual value of this is
+
+// setup 
+void setup()
+{
+  pinMode(pwm1, OUTPUT);
+  pinMode(pwm2, OUTPUT);
+  pinMode(dir1, OUTPUT);
+  pinMode(dir2, OUTPUT);
+  pinMode(intakeInd, OUTPUT);
+  pinMode(enemyRollerInd, OUTPUT);
+  pinMode(helixInd, OUTPUT);
+  pinMode(armInd, OUTPUT);
+  pinMode(ir1, INPUT);
+  pinMode(ir2, INPUT);
+  pinMode(ir3, INPUT);
+  pinMode(bump1, INPUT);
+  pinMode(bump2, INPUT);
+
+  Serial.begin(9600);
+}
+
 
 //---- Return String ---------------------
 // The dynamically sized return string
@@ -65,10 +85,13 @@ void writeToRetVal(char c)
 
 // PID
 void pid(int inputSpeed, boolean pOnly){
-  // ******* PID controller here
+  Serial.println(inputSpeed);
   
-  analogWrite(pwm1, corrected.leftSpeed);
-  analogWrite(pwn2, corrected.rightSpeed);
+  // ******* PID controller here- filler code right now
+  inputSpeed= (int) inputSpeed/9.0*255.0; 
+  Serial.println(inputSpeed);
+  analogWrite(pwm1, inputSpeed);
+  analogWrite(pwm2, inputSpeed);
 }
   
 
@@ -89,18 +112,28 @@ void sendRetVal()
   retIndex = 0;
 }
 
-// ??? are we using serialRead()?
+char serialRead()
+{
+  char in;
+  // Loop until input is not -1 (which means no input was available)
+  while ((in = Serial.read()) == -1) {}
+  return in;
+}
 
 int readToInt(){
   char val;
-  val = serial.read();
-  int intVal = atoi(val)
+  val = serialRead();
+  int intVal =  val - '0';
   return intVal;
 }
 
 
 void killAllAction(){
-  // **************************** kill all the things
+  analogWrite(pwm1, 0);
+  analogWrite(pwm2, 0);
+  analogWrite(intakeInd, 0);
+  analogWrite(enemyRollerInd, 0);
+  analogWrite(helix, 0);
 }
 
 void queryAction(){
@@ -111,6 +144,8 @@ void forwardAction(){
   int goInt = readToInt();
   digitalWrite(dir1, HIGH);
   digitalWrite(dir2, HIGH);
+  Serial.println("forward");
+  Serial.println(goInt);
   // *********** need to write PID method to ensure forward motion
   pid(goInt, false);
 }
@@ -128,7 +163,7 @@ void leftAction(){
   digitalWrite(dir1, HIGH);
   digitalWrite(dir2, LOW);
   analogWrite(pwm1, goInt);
-  analogWrite(pwn2, goInt);
+  analogWrite(pwm2, goInt);
 }
 
 void rightAction(){
@@ -136,7 +171,7 @@ void rightAction(){
   digitalWrite(dir1, LOW);
   digitalWrite(dir2, HIGH);
   analogWrite(pwm1, goInt);
-  analogWrite(pwn2, goInt);
+  analogWrite(pwm2, goInt);
 }
 
 void helixAction(){
@@ -156,32 +191,27 @@ void enemyHopperAction(){
 
 void armAction(){
   int upDown;
-  upDown = serial.read();  // reading in one char to move up or down
-  analogWrite(armInd, armServoMaxDegree);
-}
-
-void enemyHopperAction(){
-  char upDown;
-  upDown = serial.read();  // reading in one char to move up or down
-  // ********************************* stuff
+  upDown = readToInt();
+  analogWrite(armInd, armServoMaxDegree*upDown);
 }
 
 void getIRData(){
-  writeToRetValue('I');
+  writeToRetVal('I');
   // ********************************* need to make sure these chars are 2 digits
-  writeToRetValue(analogRead(ir1));
-  writeToRetValue(analogRead(ir2));
-  writeToRetValue(analogRead(ir3));
+  writeToRetVal(analogRead(ir1));
+  writeToRetVal(analogRead(ir2));
+  writeToRetVal(analogRead(ir3));
 }
 
 void getBumpData(){
-  writeToRetValue('U');
-  writeToRetValue(digitalRead(bump1));
-  writeToRetValue(digitalRead(bump2));
+  writeToRetVal('U');
+  writeToRetVal(digitalRead(bump1));
+  writeToRetVal(digitalRead(bump2));
 }
 
 void checkNewBalls(){
-  writeToRetValue('K');
+  writeToRetVal('K');
+  
   currBumpVal = digitalRead(ballBump);
   
   if (currBumpVal == HIGH && prevBumpVal == LOW){
@@ -189,16 +219,19 @@ void checkNewBalls(){
     int ballType;
     // label ballType as ours (1) or opponent's (0)
     if (ballType == 1){
-      writeToRetValue(1);
-      writeToRetValue(0);
+      writeToRetVal(1);
+      writeToRetVal(0);
+    }
     else{
-      writeToRetValue(0);
-      writeToRetValue(1);
+      writeToRetVal(0);
+      writeToRetVal(1);
     }
   prevBumpVal = currBumpVal;
+  }
 }
 
-void loop(){
+void loop()
+{
 
   // ******* NEED TO SPECIFY WHEN THE GAME MODE IS RETURNED
   
@@ -211,12 +244,13 @@ void loop(){
     while (!done){
           
         // Read in the first character, which tells us what to do
-        char in = serial.read();
+        char in = serialRead();
         
         // Performs actions based on the char read in
         switch(in){
           case killAll:
             killAllAction();
+            break;
           case query:
             queryAction();
             break;
@@ -225,25 +259,32 @@ void loop(){
             break;
           case backward:
             backwardAction();
+            break;
           case left:
             leftAction();
+            break;
           case right:
-            rightAction();            
+            rightAction();
+            break;
           case helix:
             helixAction();
+            break;
           case intake:
             intakeAction();
+            break;
           case arm:
             armAction();
+            break;
           case enemyHopper:
             enemyHopperAction();
-        }
+            break;
       }
+    }
   }
   
-  getIRData();
-  getBumpData();
-  checkNewBalls();
-  endRetVal();
-  sendRetVal();  
+//  getIRData();
+//  getBumpData();
+//  checkNewBalls();
+//  endRetVal();
+//  sendRetVal();  
 }

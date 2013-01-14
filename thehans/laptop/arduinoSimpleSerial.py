@@ -21,7 +21,7 @@ class Arduino:
     def connect(self, debug=False):
         self.debug = debug
         if self.debug: print "Connecting..."
-        names = ['COM5','COM6']
+        names = ['COM5','COM6','COM11']
         for name in names:
             try:
                 # Try to create the serial connection
@@ -46,7 +46,7 @@ class Arduino:
             if self.debug: print "Transmitting Data: " + output
 
             ##debug:
-            output = 'M'
+            # output = 'M'
             
             self.port.write(output)
             self.serialRead()
@@ -143,11 +143,10 @@ class Arduino:
             return values
 
    
-## ard = Arduino()
-## ard.connect(debug=True)
+##ard = Arduino()
+##ard.connect(debug=True)
 ##
-## ard.motorCommand(0.9)
-## ard.turnCommand(-0.98)
-## ard.packetExchange()
-##
-## print ard.retrieve('M')
+##ard.motorCommand(0.9)
+##ard.turnCommand(-0.98)
+##ard.packetExchange()
+##print ard.retrieve('M')
