@@ -1,11 +1,18 @@
 import math, Image
 import cv2.cv as cv
+import numpy
 
 class Eye:
 
     VICTOR_ORANGE = cv.CV_RGB(255, 102, 0)
-    FRAME_WIDTH = 640
-    FRAME_HEIGHT = 480
+    FRAME_WIDTH = 160
+    FRAME_HEIGHT = 120
+    RED_HSV_MIN = cv.Scalar(0, 60, 50)
+    RED_HSV_MAX = cv.Scalar(9, 256, 256)
+    RED_HSV_MIN2 = cv.Scalar(167, 50, 50)
+    RED_HSV_MAX2 = cv.Scalar(181, 256, 256)
+
+    
     
     def __init__(self, debug=False):
         self.debug = debug
@@ -15,6 +22,9 @@ class Eye:
     # fetches one frame from the camera
     def getFrame(self):
         frame = cv.QueryFrame(self.camcapture)
+        thumbnail = cv.CreateImage((self.FRAME_WIDTH,self.FRAME_HEIGHT), frame.depth, frame.nChannels)
+        cv.Resize(frame, thumbnail, cv.CV_INTER_AREA)
+        frame = thumbnail
         if frame is None:
             print "Error in getting frame"
         return frame
@@ -27,13 +37,9 @@ class Eye:
         hsv_frame = cv.CreateImage(size, cv.IPL_DEPTH_8U, 3)
         thresholded = cv.CreateImage(size, cv.IPL_DEPTH_8U, 1)
         thresholded2 = cv.CreateImage(size, cv.IPL_DEPTH_8U, 1)
-        hsv_min = cv.Scalar(0, 60, 50)
-        hsv_max = cv.Scalar(9, 256, 256)
-        hsv_min2 = cv.Scalar(167, 50, 50)
-        hsv_max2 = cv.Scalar(181, 256, 256)
         cv.CvtColor(frame, hsv_frame, cv.CV_BGR2HSV)
-        cv.InRangeS(hsv_frame, hsv_min, hsv_max, thresholded)
-        cv.InRangeS(hsv_frame, hsv_min2, hsv_max2, thresholded2)
+        cv.InRangeS(hsv_frame, self.RED_HSV_MIN, self.RED_HSV_MAX, thresholded)
+        cv.InRangeS(hsv_frame, self.RED_HSV_MIN2, self.RED_HSV_MAX2, thresholded2)
         cv.Or(thresholded, thresholded2, thresholded)
         
         # calculate the center and the radius based on the moment
@@ -43,6 +49,7 @@ class Eye:
             x = int(mm.m10/mm.m00)
             y = int(mm.m01/mm.m00)
         else:
+            # red ball not found. will implement method later.
             x = 0
             y = 0
         center = (x,y)
@@ -50,13 +57,14 @@ class Eye:
         
         # temporarily disable validball checker
         # if validBall(center,radius):
-        cv.Circle(thresholded, center, radius, self.VICTOR_ORANGE, 5)
+        # cv.Circle(thresholded, center, radius, self.VICTOR_ORANGE, 5)
         
         # calculate the relative position of the ball with 0,0 being the center of the frame. tuple of values between -1 and 1
         if self.debug: print "Center of the red ball is: " + str(center)
         relativeCenterX = (float(x)-float(self.FRAME_WIDTH)/2) / (float(self.FRAME_WIDTH)/2)
         relativeCenterY = (float(y)-float(self.FRAME_HEIGHT)/2) / (float(self.FRAME_HEIGHT)/2)
         relativeCenter = (relativeCenterX, relativeCenterY)
+        if self.debug: print "Relative Center is: " + str(relativeCenter)
         
         return relativeCenter, thresholded
     
@@ -64,7 +72,11 @@ class Eye:
     def showImage(self, frame):
         """debugging tool for outputting the frame as a new window"""
         cv.ShowImage('Camera', frame)    
-        cv.WaitKey(10)
+        cv.WaitKey(20)
 
-
-
+##d = Eye(True)
+##while True:
+##    f = d.getFrame()
+##    center, q = d.findRedBall(f)
+##    d.showImage(q)
+##    cv.WaitKey(10)
