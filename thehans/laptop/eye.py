@@ -10,7 +10,7 @@ class Eye:
     def __init__(self, debug=False):
         self.debug = debug
         if self.debug: print "Debugging mode for vision active"
-        self.camcapture = cv.CreateCameraCapture(0)
+        self.camcapture = cv.CreateCameraCapture(1)
     
     # fetches one frame from the camera
     def getFrame(self):
