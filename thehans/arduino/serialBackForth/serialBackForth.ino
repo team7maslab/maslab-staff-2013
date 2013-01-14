@@ -264,18 +264,19 @@ void loop()
 {
 
   // ******* NEED TO SPECIFY WHEN THE GAME MODE IS RETURNED
-  
-  // reset the speeds first
-  leftSpeed = 0;
-  rightSpeed = 0;
-  maxSpeed = 0;
-  
+    
   if (Serial.available() > 0){
     //------------ READ IN ALL THE COMMMANDS -------------
     // Command packet format:
     // F9LG1H1A1;
     // follows convention in the defines at the top
     boolean done = false;
+    
+      // reset the speeds first
+    leftSpeed = 0;
+    rightSpeed = 0;
+    maxSpeed = 0;
+
     while (!done){
           
         // Read in the first character, which tells us what to do
