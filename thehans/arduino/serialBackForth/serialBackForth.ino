@@ -5,8 +5,8 @@
 #define query 'Q'        // 0 numbers follow
 #define forward 'F'      // 1 number (1-9) follows
 #define backward 'B'     // 1 number (1-9) follows
-#define left 'L'         // 0 numbers follow
-#define right 'R'        // 0 numbers follow
+#define left 'L'         // 1 number (1-9) follows
+#define right 'R'        // 1 number (1-9) follows
 #define helix 'H'        // 1 number (0 or 1) follows
 #define intake 'G'       // 1 number (0 or 1) follows
 #define arm 'A'          // 1 number (0 or 1) follows
@@ -162,16 +162,16 @@ void leftAction(){
   int goInt = readToInt();
   digitalWrite(dir1, HIGH);
   digitalWrite(dir2, LOW);
-  analogWrite(pwm1, goInt);
-  analogWrite(pwm2, goInt);
+  // *********** need to write PID method to ensure backwards motion
+  pid(goInt, true);
 }
 
 void rightAction(){
   int goInt = readToInt();
   digitalWrite(dir1, LOW);
   digitalWrite(dir2, HIGH);
-  analogWrite(pwm1, goInt);
-  analogWrite(pwm2, goInt);
+  // *********** need to write PID method to ensure backwards motion
+  pid(goInt, true);
 }
 
 void helixAction(){
