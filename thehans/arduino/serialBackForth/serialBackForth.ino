@@ -42,6 +42,14 @@ int ir3 = 3;
 int bump1 = 4;
 int bump2 = 5;
 
+// tracking mode of the robot (0 = idle, 1 = passive opponent, 2 = active opponent)
+int gameMode = 0;
+
+// default move speed
+int leftSpeed = 0;
+int rightSpeed = 0;
+int maxSpeed = 0;
+  
 // ball counting
 int ballBump = 6;        // switch index counting the number of balls going up the helix
 int currBumpVal = 0;
@@ -84,30 +92,54 @@ void writeToRetVal(char c)
 //----------------------------------------
 
 // PID
-void pid(int inputSpeed, boolean pOnly){
-  Serial.println(inputSpeed);
+void pid(int inputSpeed, int leftRight){
+  // left = 1, right = 0
+  // ******* PID controller goes here- filler code right now
   
-  // ******* PID controller here- filler code right now
-  inputSpeed= (int) inputSpeed/9.0*255.0; 
-  Serial.println(inputSpeed);
-  analogWrite(pwm1, inputSpeed);
-  analogWrite(pwm2, inputSpeed);
+  if (leftRight == 0){
+    inputSpeed = (int) inputSpeed/9.0*255.0;
+    leftSpeed += inputSpeed;
+    rightSpeed += inputSpeed;
+  }
+  
+  else if (leftRight == 1){
+    rightSpeed += (int) inputSpeed/9.0*255.0;
+  }
+  
+  else if (leftRight == 2){
+    leftSpeed += (int) inputSpeed/9.0*255.0;
+  }
+  
+  // normalize
+  if (leftSpeed > rightSpeed){
+    maxSpeed = leftSpeed;
+  }
+  else{
+    maxSpeed = rightSpeed;
+  }
+  
+  if (maxSpeed > 255){
+    rightSpeed = (int) rightSpeed/(maxSpeed + 0.0);
+    leftSpeed = (int) leftSpeed/(maxSpeed + 0.0);
+  }
+  
+  analogWrite(pwm1, leftSpeed);
+  analogWrite(pwm2, rightSpeed);
+
+  Serial.print(leftSpeed);
+  Serial.print(" ");
+  Serial.println(rightSpeed);
+//  Serial.println(maxSpeed);
 }
   
 
 // Helper function to end our retVal string with the ';' command
-// and a null character
-void endRetVal()
+// and a null character, and then to send the value in
+void sendData()
 {
   retVal[retIndex] = ';';
   retVal[retIndex+1] = 0;
-}
-
-// Helper function to send the retVal through the serial connection
-// as well as reset the retIndex variable
-void sendRetVal()
-{
-  Serial.print(retVal);
+//  Serial.print(retVal);
   Serial.flush();
   retIndex = 0;
 }
@@ -144,10 +176,8 @@ void forwardAction(){
   int goInt = readToInt();
   digitalWrite(dir1, HIGH);
   digitalWrite(dir2, HIGH);
-  Serial.println("forward");
-  Serial.println(goInt);
   // *********** need to write PID method to ensure forward motion
-  pid(goInt, false);
+  pid(goInt, 0);
 }
 
 void backwardAction(){
@@ -155,23 +185,23 @@ void backwardAction(){
   digitalWrite(dir1, LOW);
   digitalWrite(dir2, LOW);
   // *********** need to write PID method to ensure backwards motion
-  pid(goInt, false);
+  pid(goInt, 0);
 }
 
 void leftAction(){
   int goInt = readToInt();
-  digitalWrite(dir1, HIGH);
-  digitalWrite(dir2, LOW);
+  //digitalWrite(dir1, HIGH);
+  //digitalWrite(dir2, LOW);
   // *********** need to write PID method to ensure backwards motion
-  pid(goInt, true);
+  pid(goInt, 1);
 }
 
 void rightAction(){
   int goInt = readToInt();
-  digitalWrite(dir1, LOW);
-  digitalWrite(dir2, HIGH);
+  //digitalWrite(dir1, LOW);
+  //digitalWrite(dir2, HIGH);
   // *********** need to write PID method to ensure backwards motion
-  pid(goInt, true);
+  pid(goInt, 2);
 }
 
 void helixAction(){
@@ -235,6 +265,11 @@ void loop()
 
   // ******* NEED TO SPECIFY WHEN THE GAME MODE IS RETURNED
   
+  // reset the speeds first
+  leftSpeed = 0;
+  rightSpeed = 0;
+  maxSpeed = 0;
+  
   if (Serial.available() > 0){
     //------------ READ IN ALL THE COMMMANDS -------------
     // Command packet format:
@@ -281,10 +316,8 @@ void loop()
       }
     }
   }
-  
-//  getIRData();
-//  getBumpData();
-//  checkNewBalls();
-//  endRetVal();
-//  sendRetVal();  
+  //getIRData();
+  //getBumpData();
+  //checkNewBalls();
+  //sendData();
 }
