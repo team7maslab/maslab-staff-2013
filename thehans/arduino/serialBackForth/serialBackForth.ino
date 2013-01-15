@@ -57,8 +57,7 @@ int prevBumpVal = 0;
 int armServoMaxDegree = 90; // *********** figure out what the actual value of this is
 
 // setup 
-void setup()
-{
+void setup(){
   pinMode(pwm1, OUTPUT);
   pinMode(pwm2, OUTPUT);
   pinMode(dir1, OUTPUT);
@@ -76,7 +75,6 @@ void setup()
   Serial.begin(9600);
 }
 
-
 //---- Return String ---------------------
 // The dynamically sized return string
 char* retVal;
@@ -84,12 +82,10 @@ int retIndex;
 
 // Helper function to keep track of retIndex and use it to write
 // a character to the correct location in the retVal array
-void writeToRetVal(char c)
-{
+void writeToRetVal(char c){
   retVal[retIndex] = c;
   retIndex++;
 }
-//----------------------------------------
 
 // PID
 void pid(int inputSpeed, int leftRight){
@@ -129,14 +125,11 @@ void pid(int inputSpeed, int leftRight){
   Serial.print(leftSpeed);
   Serial.print(" ");
   Serial.println(rightSpeed);
-//  Serial.println(maxSpeed);
 }
-  
 
 // Helper function to end our retVal string with the ';' command
 // and a null character, and then to send the value in
-void sendData()
-{
+void sendData(){
   retVal[retIndex] = ';';
   retVal[retIndex+1] = 0;
 //  Serial.print(retVal);
@@ -144,14 +137,14 @@ void sendData()
   retIndex = 0;
 }
 
-char serialRead()
-{
+char serialRead(){
   char in;
   // Loop until input is not -1 (which means no input was available)
   while ((in = Serial.read()) == -1) {}
   return in;
 }
 
+// Read a char from serial and convert to an int
 int readToInt(){
   char val;
   val = serialRead();
@@ -159,7 +152,7 @@ int readToInt(){
   return intVal;
 }
 
-
+// Stop all robot action
 void killAllAction(){
   analogWrite(pwm1, 0);
   analogWrite(pwm2, 0);
