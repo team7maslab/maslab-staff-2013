@@ -58,6 +58,27 @@ int currBumpVal = 0;
 int prevBumpVal = 0;
 int armServoMaxDegree = 90; // *********** figure out what the actual value of this is
 
+// encoder values
+int enc1Val = 0;
+int enc1Prev = 0;
+int enc2Val = 0;
+int enc2Prev = 0;
+
+// stuck detection
+int ir1Val = 0;
+int ir1Prev = 0;
+int ir2Val = 0;
+int ir2Prev = 0;
+int ir3Val = 0;
+int ir3Prev = 0;
+int curr1Val = 0;
+int curr1Prev = 0;
+int curr2Val = 0;
+int curr2Prev = 0;
+int irTOL = 50;          // tolerance for what values we'll call equal **** might need to change
+int currTOL = 10;        // tolerance for what values we'll call equal **** need to test to see what's reasonable **********
+int currHIGH = 50;       // values we'll call high current **** need to test to see what's reasonable*******
+
 // setup 
 void setup(){
   pinMode(pwm1, OUTPUT);
@@ -258,10 +279,13 @@ void armAction(){
 
 void getIRData(){
   writeToRetVal('I');
+  ir1Val = analogRead(ir1);
+  ir2Val = analogRead(ir2);
+  ir3Val = analogRead(ir3);  
   // ********************************* need to make sure these chars are 3 digits
-  writeToRetVal(analogRead(ir1));
-  writeToRetVal(analogRead(ir2));
-  writeToRetVal(analogRead(ir3));
+  writeToRetVal(ir1Val);
+  writeToRetVal(ir2Val);
+  writeToRetVal(ir3Val);
 }
 
 void getBumpData(){
@@ -290,6 +314,41 @@ void checkNewBalls(){
   prevBumpVal = currBumpVal;
   }
 }
+
+boolean stuckDetect(){
+  int stuckVotes = 0;
+  
+  if (abs(ir1Val - ir1Prev) < irTOL){
+    stuckVotes++;
+  }
+  if (abs(ir2Val - ir2Prev) < irTOL){
+    stuckVotes++;
+  }
+  if (abs(ir3Val - ir3Prev) < irTOL){
+    stuckVotes++;
+  }
+  if (abs(curr1Val - curr1Prev) < currTOL && curr1Val > currHIGH){      // if motor current values are high and unchanging
+    stuckVotes++;
+  }
+  if (abs(curr2Val - curr2Prev) < currTOL && curr2Val > currHIGH){
+    stuckVotes++;
+  }
+  
+  // ********** need to integrate w/ encoder...
+    
+  ir1Prev = ir1Val;
+  ir2Prev = ir2Val;
+  ir3Prev = ir3Val;
+  curr1Prev = curr1Val;
+  curr2Prev = curr2Val;
+  
+  if (stuckVotes > 3){
+    return true;
+  }
+  else{
+    return false;
+  }
+}  
 
 void loop(){
 
@@ -356,4 +415,7 @@ void loop(){
   //getBumpData();
   //checkNewBalls();
   //sendData();
+  
+  boolean areWeStuck = stuckDetect(); // stuck detection
+  
 }
