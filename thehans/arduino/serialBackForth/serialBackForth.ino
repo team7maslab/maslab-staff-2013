@@ -132,7 +132,6 @@ void pid(int inputSpeed, int leftRight){
 void sendData(){
   retVal[retIndex] = ';';
   retVal[retIndex+1] = 0;
-//  Serial.print(retVal);
   Serial.flush();
   retIndex = 0;
 }
@@ -306,6 +305,9 @@ void loop()
             break;
           case enemyHopper:
             enemyHopperAction();
+            break;
+          case doneChar:
+            done = true;
             break;
       }
     }
