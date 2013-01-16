@@ -13,14 +13,14 @@
 #define enemyHopper 'E'  // 1 number (0 or 1) follows
 
 // Specify the char commands being sent from Arduino
-#define mode = 'M'       // 0 = idle, 1 = passive opponent, 2 = aggressive 
-#define ir = 'I'         // 3 3-digit numbers follow- one number for each IR
+//#define mode 'M'         // 0 = idle, 1 = passive opponent, 2 = aggressive       ************ need to use this at some point
+#define ir 'I'           // 3 3-digit numbers follow- one number for each IR
                          // IR values are scaled by Arduino- high = close, low = far
-#define bump = 'U'       // x numbers (0 or 1) follow ***** need to specify how many bump sensors there are
-#define balls = 'K'      // 2 numbers follow (0 or 1)
+#define bump 'U'         // x numbers (0 or 1) follow ***** need to specify how many bump sensors there are
+#define balls 'K'        // 2 numbers follow (0 or 1)
                          // +1 to our balls in hopper, +1 to enemy balls in hopper
 
-#define doneChar = ';'   // 0 numbers follow
+#define doneChar ';'     // 0 numbers follow
 #define killAll 'Z'      // 0 numbers follow
 
 // wheel motor indicies
@@ -291,8 +291,7 @@ void checkNewBalls(){
   }
 }
 
-void loop()
-{
+void loop(){
 
   // ******* NEED TO SPECIFY WHEN THE GAME MODE IS RETURNED
     
@@ -348,7 +347,7 @@ void loop()
           case doneChar:
             done = true;
             break;
-      }      
+        }      
     }
     moveRobot();    
   }
