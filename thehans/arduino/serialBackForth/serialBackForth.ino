@@ -14,7 +14,7 @@
 
 // Specify the char commands being sent from Arduino
 #define mode = 'M'       // 0 = idle, 1 = passive opponent, 2 = aggressive 
-#define ir = 'I'         // 3 2-digit numbers (00-99) follow- one number for each IR
+#define ir = 'I'         // 3 3-digit numbers follow- one number for each IR
                          // IR values are scaled by Arduino- high = close, low = far
 #define bump = 'U'       // x numbers (0 or 1) follow ***** need to specify how many bump sensors there are
 #define balls = 'K'      // 2 numbers follow (0 or 1)
@@ -24,10 +24,12 @@
 #define killAll 'Z'      // 0 numbers follow
 
 // wheel motor indicies
-int pwm1 = 11;
-int dir1 = 12;
+int pwm1 = 10;
+int dir1 = 11;
+int motorCurr1 = 12;
 int pwm2 = 13;
-int dir2 = 10;
+int dir2 = 14;
+int motorCurr2 = 15;
 
 // ball handling motor indicies
 int intakeInd = 53;
@@ -71,11 +73,12 @@ void setup(){
   pinMode(ir3, INPUT);
   pinMode(bump1, INPUT);
   pinMode(bump2, INPUT);
+  pinMode(motorCurr1, INPUT);
+  pinMode(motorCurr2, INPUT);
 
   Serial.begin(9600);
 }
 
-//---- Return String ---------------------
 // The dynamically sized return string
 char* retVal;
 int retIndex;
@@ -87,46 +90,6 @@ void writeToRetVal(char c){
   retIndex++;
 }
 
-// PID
-void pid(int inputSpeed, int leftRight){
-  // left = 1, right = 0
-  // ******* PID controller goes here- filler code right now
-  
-  if (leftRight == 0){
-    inputSpeed = (int) inputSpeed/9.0*255.0;
-    leftSpeed += inputSpeed;
-    rightSpeed += inputSpeed;
-  }
-  
-  else if (leftRight == 1){
-    rightSpeed += (int) inputSpeed/9.0*255.0;
-  }
-  
-  else if (leftRight == 2){
-    leftSpeed += (int) inputSpeed/9.0*255.0;
-  }
-  
-  // normalize
-  if (leftSpeed > rightSpeed){
-    maxSpeed = leftSpeed;
-  }
-  else{
-    maxSpeed = rightSpeed;
-  }
-  
-  if (maxSpeed > 255){
-    rightSpeed = (int) rightSpeed/(maxSpeed + 0.0);
-    leftSpeed = (int) leftSpeed/(maxSpeed + 0.0);
-  }
-  
-  analogWrite(pwm1, leftSpeed);
-  analogWrite(pwm2, rightSpeed);
-
-  Serial.print(leftSpeed);
-  Serial.print(" ");
-  Serial.println(rightSpeed);
-}
-
 // Helper function to end our retVal string with the ';' command
 // and a null character, and then to send the value in
 void sendData(){
@@ -136,9 +99,9 @@ void sendData(){
   retIndex = 0;
 }
 
+// Loop until input is not -1 (which means no input was available)
 char serialRead(){
   char in;
-  // Loop until input is not -1 (which means no input was available)
   while ((in = Serial.read()) == -1) {}
   return in;
 }
@@ -164,36 +127,112 @@ void queryAction(){
   // ***************************** 
 }
 
+// PID
+void pid(int inputSpeed, int leftRight){
+  // forward = 0, backward = 1, left = 2, right = 3
+  // *********************************************************** PID controller goes here- just movement code right now
+  
+  inputSpeed = (int) inputSpeed/9.0*255.0;
+  
+  if (leftRight == 0){        // going forward
+    leftSpeed += inputSpeed;
+    rightSpeed += inputSpeed;
+  }
+  
+  else if (leftRight == 1){    // going backward
+    leftSpeed -= inputSpeed;
+    rightSpeed -= inputSpeed;
+  }    
+  
+  else if (leftRight == 2){    // going left
+    leftSpeed -= inputSpeed;
+    rightSpeed += inputSpeed;
+  }
+  
+  else if (leftRight == 3){      // going right
+    leftSpeed += inputSpeed;
+    rightSpeed -= inputSpeed;
+  }
+}
+
 void forwardAction(){
-  int goInt = readToInt();
-  digitalWrite(dir1, HIGH);
-  digitalWrite(dir2, HIGH);
-  // *********** need to write PID method to ensure forward motion
-  pid(goInt, 0);
+  // *********** need to write PID method to ensure forward motion ************** test w/ encoders
+  pid(readToInt(), 0);
 }
 
 void backwardAction(){
-  int goInt = readToInt();
-  digitalWrite(dir1, LOW);
-  digitalWrite(dir2, LOW);
   // *********** need to write PID method to ensure backwards motion
-  pid(goInt, 0);
+  pid(readToInt(), 1);
 }
 
 void leftAction(){
-  int goInt = readToInt();
-  //digitalWrite(dir1, HIGH);
-  //digitalWrite(dir2, LOW);
-  // *********** need to write PID method to ensure backwards motion
-  pid(goInt, 1);
+  // *********** need some kind of integration into mapping to figure out the angle driven (maybe here?)
+  pid(readToInt(), 2);
 }
 
 void rightAction(){
-  int goInt = readToInt();
-  //digitalWrite(dir1, LOW);
-  //digitalWrite(dir2, HIGH);
-  // *********** need to write PID method to ensure backwards motion
-  pid(goInt, 2);
+  // *********** need some kind of integration into mapping to figure out the angle driven (maybe here?)
+  pid(readToInt(), 3);
+}
+
+void moveRobot(){
+  
+  // set robot direction
+  boolean leftNeg = false;
+  boolean rightNeg = false;
+  
+  if (leftSpeed < 0){
+    digitalWrite(dir1, LOW);
+    leftNeg = true;
+  }
+  else{
+    digitalWrite(dir1, HIGH);
+  }
+  
+  if (rightSpeed < 0){
+    digitalWrite(dir2, LOW);
+    rightNeg = true;
+  }
+  else{
+    digitalWrite(dir2, HIGH);
+  }
+  
+  // normalize speed values
+  leftSpeed = abs(leftSpeed);
+  rightSpeed = abs(rightSpeed);
+  int maxValue;
+  if (leftSpeed > 255 || rightSpeed > 255){
+    if (leftSpeed > rightSpeed){
+      maxValue = leftSpeed;
+    }
+    else{
+      maxValue = rightSpeed;
+    }
+  }
+  else{
+    maxValue = 255;
+  }
+  
+  leftSpeed = leftSpeed/maxValue;
+  rightSpeed = rightSpeed/maxValue;
+  
+  // send speed values to the motors
+  analogWrite(pwm1, leftSpeed);
+  analogWrite(pwm2, rightSpeed);
+
+  if (leftNeg){
+    Serial.print(0-leftSpeed);
+  }
+  else{
+    Serial.print(leftSpeed);
+  }
+  Serial.print(" ");
+  if (rightNeg){
+    Serial.println(0-rightSpeed);
+  }
+  else{
+    Serial.println(rightSpeed);
+  }
 }
 
 void helixAction(){
@@ -219,7 +258,7 @@ void armAction(){
 
 void getIRData(){
   writeToRetVal('I');
-  // ********************************* need to make sure these chars are 2 digits
+  // ********************************* need to make sure these chars are 3 digits
   writeToRetVal(analogRead(ir1));
   writeToRetVal(analogRead(ir2));
   writeToRetVal(analogRead(ir3));
@@ -260,7 +299,7 @@ void loop()
   if (Serial.available() > 0){
     //------------ READ IN ALL THE COMMMANDS -------------
     // Command packet format:
-    // F9LG1H1A1;
+    // F5L2G1H1A1;
     // follows convention in the defines at the top
     boolean done = false;
     
@@ -309,9 +348,11 @@ void loop()
           case doneChar:
             done = true;
             break;
-      }
+      }      
     }
+    moveRobot();    
   }
+  // read in sensor data
   //getIRData();
   //getBumpData();
   //checkNewBalls();
