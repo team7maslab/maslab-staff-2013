@@ -282,6 +282,7 @@ void getIRData(){
   ir1Val = analogRead(ir1);
   ir2Val = analogRead(ir2);
   ir3Val = analogRead(ir3);  
+  
   // ********************************* need to make sure these chars are 3 digits
   writeToRetVal(ir1Val);
   writeToRetVal(ir2Val);
@@ -408,7 +409,7 @@ void loop(){
             break;
         }      
     }
-    moveRobot();    
+    moveRobot();
   }
   // read in sensor data
   //getIRData();
@@ -416,6 +417,8 @@ void loop(){
   //checkNewBalls();
   //sendData();
   
-  boolean areWeStuck = stuckDetect(); // stuck detection
+  // ********** need collision avoidance in Python
+  
+  boolean amIStuck = stuckDetect(); // stuck detection
   
 }
