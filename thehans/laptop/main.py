@@ -27,8 +27,6 @@ def run():
                 (x,y), frame = cyclop.findGreenBall(frame)
             else:
                 (x,y), frame = cyclop.findRedBall(frame)
-            
-    #        print (x,y)
 
             if (x == 0 and y == 0):      # no ball found
                 # wander until you find a ball
