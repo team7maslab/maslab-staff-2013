@@ -13,21 +13,23 @@
 #define enemyHopper 'E'  // 1 number (0 or 1) follows
 
 // Specify the char commands being sent from Arduino
-#define mode = 'M'       // 0 = idle, 1 = passive opponent, 2 = aggressive 
-#define ir = 'I'         // 3 2-digit numbers (00-99) follow- one number for each IR
+//#define mode 'M'         // 0 = idle, 1 = passive opponent, 2 = aggressive       ************ need to use this at some point
+#define ir 'I'           // 3 3-digit numbers follow- one number for each IR
                          // IR values are scaled by Arduino- high = close, low = far
-#define bump = 'U'       // x numbers (0 or 1) follow ***** need to specify how many bump sensors there are
-#define balls = 'K'      // 2 numbers follow (0 or 1)
+#define bump 'U'         // x numbers (0 or 1) follow ***** need to specify how many bump sensors there are
+#define balls 'K'        // 2 numbers follow (0 or 1)
                          // +1 to our balls in hopper, +1 to enemy balls in hopper
 
-#define doneChar = ';'   // 0 numbers follow
+#define doneChar ';'     // 0 numbers follow
 #define killAll 'Z'      // 0 numbers follow
 
 // wheel motor indicies
-int pwm1 = 11;
-int dir1 = 12;
+int pwm1 = 10;
+int dir1 = 11;
+int motorCurr1 = 12;
 int pwm2 = 13;
-int dir2 = 10;
+int dir2 = 14;
+int motorCurr2 = 15;
 
 // ball handling motor indicies
 int intakeInd = 53;
@@ -56,9 +58,29 @@ int currBumpVal = 0;
 int prevBumpVal = 0;
 int armServoMaxDegree = 90; // *********** figure out what the actual value of this is
 
+// encoder values
+int enc1Val = 0;
+int enc1Prev = 0;
+int enc2Val = 0;
+int enc2Prev = 0;
+
+// stuck detection
+int ir1Val = 0;
+int ir1Prev = 0;
+int ir2Val = 0;
+int ir2Prev = 0;
+int ir3Val = 0;
+int ir3Prev = 0;
+int curr1Val = 0;
+int curr1Prev = 0;
+int curr2Val = 0;
+int curr2Prev = 0;
+int irTOL = 50;          // tolerance for what values we'll call equal **** might need to change
+int currTOL = 10;        // tolerance for what values we'll call equal **** need to test to see what's reasonable **********
+int currHIGH = 50;       // values we'll call high current **** need to test to see what's reasonable*******
+
 // setup 
-void setup()
-{
+void setup(){
   pinMode(pwm1, OUTPUT);
   pinMode(pwm2, OUTPUT);
   pinMode(dir1, OUTPUT);
@@ -72,86 +94,40 @@ void setup()
   pinMode(ir3, INPUT);
   pinMode(bump1, INPUT);
   pinMode(bump2, INPUT);
+  pinMode(motorCurr1, INPUT);
+  pinMode(motorCurr2, INPUT);
 
   Serial.begin(9600);
 }
 
-
-//---- Return String ---------------------
 // The dynamically sized return string
 char* retVal;
 int retIndex;
 
 // Helper function to keep track of retIndex and use it to write
 // a character to the correct location in the retVal array
-void writeToRetVal(char c)
-{
+void writeToRetVal(char c){
   retVal[retIndex] = c;
   retIndex++;
 }
-//----------------------------------------
-
-// PID
-void pid(int inputSpeed, int leftRight){
-  // left = 1, right = 0
-  // ******* PID controller goes here- filler code right now
-  
-  if (leftRight == 0){
-    inputSpeed = (int) inputSpeed/9.0*255.0;
-    leftSpeed += inputSpeed;
-    rightSpeed += inputSpeed;
-  }
-  
-  else if (leftRight == 1){
-    rightSpeed += (int) inputSpeed/9.0*255.0;
-  }
-  
-  else if (leftRight == 2){
-    leftSpeed += (int) inputSpeed/9.0*255.0;
-  }
-  
-  // normalize
-  if (leftSpeed > rightSpeed){
-    maxSpeed = leftSpeed;
-  }
-  else{
-    maxSpeed = rightSpeed;
-  }
-  
-  if (maxSpeed > 255){
-    rightSpeed = (int) rightSpeed/(maxSpeed + 0.0);
-    leftSpeed = (int) leftSpeed/(maxSpeed + 0.0);
-  }
-  
-  analogWrite(pwm1, leftSpeed);
-  analogWrite(pwm2, rightSpeed);
-
-  Serial.print(leftSpeed);
-  Serial.print(" ");
-  Serial.println(rightSpeed);
-//  Serial.println(maxSpeed);
-}
-  
 
 // Helper function to end our retVal string with the ';' command
 // and a null character, and then to send the value in
-void sendData()
-{
+void sendData(){
   retVal[retIndex] = ';';
   retVal[retIndex+1] = 0;
-//  Serial.print(retVal);
   Serial.flush();
   retIndex = 0;
 }
 
-char serialRead()
-{
+// Loop until input is not -1 (which means no input was available)
+char serialRead(){
   char in;
-  // Loop until input is not -1 (which means no input was available)
   while ((in = Serial.read()) == -1) {}
   return in;
 }
 
+// Read a char from serial and convert to an int
 int readToInt(){
   char val;
   val = serialRead();
@@ -159,7 +135,7 @@ int readToInt(){
   return intVal;
 }
 
-
+// Stop all robot action
 void killAllAction(){
   analogWrite(pwm1, 0);
   analogWrite(pwm2, 0);
@@ -172,36 +148,117 @@ void queryAction(){
   // ***************************** 
 }
 
+// PID
+void pid(int inputSpeed, int leftRight){
+  // forward = 0, backward = 1, left = 2, right = 3
+  // *********************************************************** PID controller goes here- just movement code right now
+  
+  inputSpeed = (int) inputSpeed/9.0*255.0;
+  
+  if (leftRight == 0){        // going forward
+    leftSpeed += inputSpeed;
+    rightSpeed += inputSpeed;
+  }
+  
+  else if (leftRight == 1){    // going backward
+    leftSpeed -= inputSpeed;
+    rightSpeed -= inputSpeed;
+  }    
+  
+  else if (leftRight == 2){    // going left
+    leftSpeed -= inputSpeed;
+    rightSpeed += inputSpeed;
+  }
+  
+  else if (leftRight == 3){      // going right
+    leftSpeed += inputSpeed;
+    rightSpeed -= inputSpeed;
+  }
+}
+
 void forwardAction(){
-  int goInt = readToInt();
-  digitalWrite(dir1, HIGH);
-  digitalWrite(dir2, HIGH);
-  // *********** need to write PID method to ensure forward motion
-  pid(goInt, 0);
+  // *********** need to write PID method to ensure forward motion ************** test w/ encoders
+  pid(readToInt(), 0);
 }
 
 void backwardAction(){
-  int goInt = readToInt();
-  digitalWrite(dir1, LOW);
-  digitalWrite(dir2, LOW);
   // *********** need to write PID method to ensure backwards motion
-  pid(goInt, 0);
+  pid(readToInt(), 1);
 }
 
 void leftAction(){
-  int goInt = readToInt();
-  //digitalWrite(dir1, HIGH);
-  //digitalWrite(dir2, LOW);
-  // *********** need to write PID method to ensure backwards motion
-  pid(goInt, 1);
+  // *********** need some kind of integration into mapping to figure out the angle driven (maybe here?)
+  pid(readToInt(), 2);
 }
 
 void rightAction(){
-  int goInt = readToInt();
-  //digitalWrite(dir1, LOW);
-  //digitalWrite(dir2, HIGH);
-  // *********** need to write PID method to ensure backwards motion
-  pid(goInt, 2);
+  // *********** need some kind of integration into mapping to figure out the angle driven (maybe here?)
+  pid(readToInt(), 3);
+}
+
+void moveRobot(){
+
+  // set robot direction
+  boolean leftNeg = false;
+  boolean rightNeg = false;
+  
+  if (leftSpeed < 0){
+    digitalWrite(dir1, LOW);
+    leftNeg = true;
+  }
+  else{
+    digitalWrite(dir1, HIGH);
+  }
+  
+  if (rightSpeed < 0){
+    digitalWrite(dir2, LOW);
+    rightNeg = true;
+  }
+  else{
+    digitalWrite(dir2, HIGH);
+  }
+  
+  // normalize speed values
+  leftSpeed = abs(leftSpeed);
+  rightSpeed = abs(rightSpeed);
+  int maxValue;
+  if (leftSpeed > 255 || rightSpeed > 255){
+    if (leftSpeed > rightSpeed){
+      maxValue = leftSpeed;
+    }
+    else{
+      maxValue = rightSpeed;
+    }
+  }
+  else{
+    maxValue = 255;
+  }
+
+  Serial.print(leftSpeed);
+  Serial.print(" ");
+  Serial.println(rightSpeed);
+  Serial.println(maxValue);
+  
+  leftSpeed = (int) (leftSpeed+0.0)/(maxValue+0.0)*255;
+  rightSpeed = (int) (rightSpeed+0.0)/(maxValue+0.0)*255;
+  
+  // send speed values to the motors
+  analogWrite(pwm1, leftSpeed);
+  analogWrite(pwm2, rightSpeed);
+
+  if (leftNeg){
+    Serial.print(0-leftSpeed);
+  }
+  else{
+    Serial.print(leftSpeed);
+  }
+  Serial.print(" ");
+  if (rightNeg){
+    Serial.println(0-rightSpeed);
+  }
+  else{
+    Serial.println(rightSpeed);
+  }
 }
 
 void helixAction(){
@@ -227,10 +284,14 @@ void armAction(){
 
 void getIRData(){
   writeToRetVal('I');
-  // ********************************* need to make sure these chars are 2 digits
-  writeToRetVal(analogRead(ir1));
-  writeToRetVal(analogRead(ir2));
-  writeToRetVal(analogRead(ir3));
+  ir1Val = analogRead(ir1);
+  ir2Val = analogRead(ir2);
+  ir3Val = analogRead(ir3);  
+  
+  // ********************************* need to make sure these chars are 3 digits
+  writeToRetVal(ir1Val);
+  writeToRetVal(ir2Val);
+  writeToRetVal(ir3Val);
 }
 
 void getBumpData(){
@@ -260,15 +321,49 @@ void checkNewBalls(){
   }
 }
 
-void loop()
-{
+boolean stuckDetect(){
+  int stuckVotes = 0;
+  
+  if (abs(ir1Val - ir1Prev) < irTOL){
+    stuckVotes++;
+  }
+  if (abs(ir2Val - ir2Prev) < irTOL){
+    stuckVotes++;
+  }
+  if (abs(ir3Val - ir3Prev) < irTOL){
+    stuckVotes++;
+  }
+  if (abs(curr1Val - curr1Prev) < currTOL && curr1Val > currHIGH){      // if motor current values are high and unchanging
+    stuckVotes++;
+  }
+  if (abs(curr2Val - curr2Prev) < currTOL && curr2Val > currHIGH){
+    stuckVotes++;
+  }
+  
+  // ********** need to integrate w/ encoder...
+    
+  ir1Prev = ir1Val;
+  ir2Prev = ir2Val;
+  ir3Prev = ir3Val;
+  curr1Prev = curr1Val;
+  curr2Prev = curr2Val;
+  
+  if (stuckVotes > 3){
+    return true;
+  }
+  else{
+    return false;
+  }
+}  
+
+void loop(){
 
   // ******* NEED TO SPECIFY WHEN THE GAME MODE IS RETURNED
     
   if (Serial.available() > 0){
     //------------ READ IN ALL THE COMMMANDS -------------
     // Command packet format:
-    // F9LG1H1A1;
+    // F5L2G1H1A1;
     // follows convention in the defines at the top
     boolean done = false;
     
@@ -314,11 +409,19 @@ void loop()
           case enemyHopper:
             enemyHopperAction();
             break;
-      }
+          case doneChar:
+            done = true;
+            break;
+        }      
     }
+    moveRobot();
   }
-  //getIRData();
-  //getBumpData();
+  // read in sensor data
+//  getIRData();
+//  getBumpData();
   //checkNewBalls();
-  //sendData();
+//  sendData();
+  
+//  boolean amIStuck = stuckDetect(); // stuck detection
+  
 }

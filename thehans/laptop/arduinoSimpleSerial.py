@@ -87,17 +87,17 @@ class Arduino:
     def motorCommand(self, speed):
         """Set the drive motors.  Speeds range from -1.0 to 1.0"""
         if speed >= 0:
-            self.outputDict['F'] = int(speed*10)
+            self.outputDict['F'] = math.max(int(speed*10),9)
         else:
-            self.outputDict['B'] = int(math.fabs(speed*10))
+            self.outputDict['B'] = math.max(int(math.fabs(speed*10)),9)
 
     # Turn controls     
     def turnCommand(self, heading):
         """Turn in a direction. Headings range from -1.0 to 1.0"""
         if heading >= 0:
-            self.outputDict['R'] = int(heading*10)
+            self.outputDict['R'] = math.max(int(heading*10), 9)
         else:
-            self.outputDict['L'] = int(math.fabs(heading*10))
+            self.outputDict['L'] = math.max(int(math.fabs(heading*10)),9)
 
     # Helix controls
     def helixCommand(self, mode):
