@@ -289,9 +289,22 @@ void getIRData(){
   ir3Val = analogRead(ir3);  
   
   // ********************************* need to make sure these chars are 3 digits
-  writeToRetVal(ir1Val);
-  writeToRetVal(ir2Val);
-  writeToRetVal(ir3Val);
+  // ********** put this back in
+//  writeToRetVal(ir1Val);
+//  writeToRetVal(ir2Val);
+//  writeToRetVal(ir3Val);
+  if (ir1Val > 375 || ir2Val > 375 || ir3Val > 375){
+    leftSpeed = 0;
+    rightSpeed = 0;
+    pid(5,2);
+    moveRobot();
+    if (ir1Val > 375){
+      pid(5, 4);
+    }
+    if (ir3Val > 375){
+      pid(5, 3);
+    }
+  }
 }
 
 void getBumpData(){
@@ -417,7 +430,7 @@ void loop(){
     moveRobot();
   }
   // read in sensor data
-//  getIRData();
+  getIRData();
 //  getBumpData();
   //checkNewBalls();
 //  sendData();
