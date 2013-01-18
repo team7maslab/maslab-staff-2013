@@ -63,6 +63,7 @@ class Arduino:
         data = ""
         for key, value in self.outputDict.iteritems():
             data += key + str(value)
+        data = data + ";"
         return data
 
     # Read the serial and store the results as a dictionary
