@@ -16,13 +16,12 @@ def run():
     
     while True:
         frame = cyclop.getFrame()
-        (x,y), frame = cyclop.findRedBall(frame)
+        (x,y), d = cyclop.findRedBall(frame)
         print (x,y)
-        ard.motorCommand(0.5)
+        ard.motorCommand(0.3)
         ard.turnCommand(x)
-        cyclop.showImage(frame)
+        # cyclop.showImage(frame)
         ard.packetExchange()
-        time.sleep(.02)
         
     print 'mode ' + mode + ' initiated'
 

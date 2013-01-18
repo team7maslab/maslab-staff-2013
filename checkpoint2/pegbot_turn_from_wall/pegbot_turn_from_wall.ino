@@ -9,7 +9,7 @@ int goL = 200;
 int goR = 200;
 
 // sensor stuff
-int ir = 0;
+int ir = 7;
 int irValue = 0;
 
 int on = 1;
@@ -73,4 +73,5 @@ void loop()
 {
   forward(100);
   avoidWall();
+  Serial.println(analogRead(ir));
 }

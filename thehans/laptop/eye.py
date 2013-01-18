@@ -5,8 +5,8 @@ import numpy
 class Eye:
 
     VICTOR_ORANGE = cv.CV_RGB(255, 102, 0)
-    FRAME_WIDTH = 160
-    FRAME_HEIGHT = 120
+    FRAME_WIDTH = 640#160
+    FRAME_HEIGHT = 480#120
     RED_HSV_MIN = cv.Scalar(0, 60, 50)
     RED_HSV_MAX = cv.Scalar(9, 256, 256)
     RED_HSV_MIN2 = cv.Scalar(167, 50, 50)
@@ -17,14 +17,15 @@ class Eye:
     def __init__(self, debug=False):
         self.debug = debug
         if self.debug: print "Debugging mode for vision active"
-        self.camcapture = cv.CreateCameraCapture(1)
+        self.camcapture = cv.CreateCameraCapture(2)
     
     # fetches one frame from the camera
     def getFrame(self):
         frame = cv.QueryFrame(self.camcapture)
-        thumbnail = cv.CreateImage((self.FRAME_WIDTH,self.FRAME_HEIGHT), frame.depth, frame.nChannels)
-        cv.Resize(frame, thumbnail, cv.CV_INTER_AREA)
-        frame = thumbnail
+        print frame
+        # thumbnail = cv.CreateImage((self.FRAME_WIDTH,self.FRAME_HEIGHT), 1, 3)
+        # cv.Resize(frame, thumbnail, cv.CV_INTER_AREA)
+        # frame = thumbnail
         if frame is None:
             print "Error in getting frame"
         return frame

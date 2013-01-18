@@ -21,7 +21,7 @@ class Arduino:
     def connect(self, debug=False):
         self.debug = debug
         if self.debug: print "Connecting..."
-        names = ['COM5','COM6','COM11','/dev/tty0','/dev/tty1','/dev/tty2', '/dev/ttyACM0']
+        names = ['COM5','COM6','COM11','/dev/ttyACM0']
         for name in names:
             try:
                 # Try to create the serial connection
