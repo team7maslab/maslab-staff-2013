@@ -197,7 +197,7 @@ void rightAction(){
 }
 
 void moveRobot(){
-  
+
   // set robot direction
   boolean leftNeg = false;
   boolean rightNeg = false;
@@ -233,9 +233,14 @@ void moveRobot(){
   else{
     maxValue = 255;
   }
+
+  Serial.print(leftSpeed);
+  Serial.print(" ");
+  Serial.println(rightSpeed);
+  Serial.println(maxValue);
   
-  leftSpeed = leftSpeed/maxValue;
-  rightSpeed = rightSpeed/maxValue;
+  leftSpeed = (int) (leftSpeed+0.0)/(maxValue+0.0)*255;
+  rightSpeed = (int) (rightSpeed+0.0)/(maxValue+0.0)*255;
   
   // send speed values to the motors
   analogWrite(pwm1, leftSpeed);
@@ -412,13 +417,11 @@ void loop(){
     moveRobot();
   }
   // read in sensor data
-  //getIRData();
-  //getBumpData();
+//  getIRData();
+//  getBumpData();
   //checkNewBalls();
-  //sendData();
+//  sendData();
   
-  // ********** need collision avoidance in Python
-  
-  boolean amIStuck = stuckDetect(); // stuck detection
+//  boolean amIStuck = stuckDetect(); // stuck detection
   
 }
