@@ -3,6 +3,8 @@ import time, eye, random, sys
 
 def run():
 
+    findColor = "green"
+    
     #Waiting for button press on robot to denote start
     # need to add button press into the code
     print 'connected! waiting for button press'
@@ -21,8 +23,11 @@ def run():
     try:
         while True:
             frame = cyclop.getFrame()
-    #        (x,y), frame = cyclop.findRedBall(frame)
-            (x,y), frame = cyclop.findGreenBall(frame)
+            if (findColor == "green"):
+                (x,y), frame = cyclop.findGreenBall(frame)
+            else:
+                (x,y), frame = cyclop.findRedBall(frame)
+            
     #        print (x,y)
 
             if (x == 0 and y == 0):      # no ball found
@@ -36,10 +41,10 @@ def run():
                 turnTime -= 1
 
                 
-    #        ard.motorCommand(0.5)
-    #        ard.turnCommand(x)
+            ard.motorCommand(0.5)
+            ard.turnCommand(x)
             cyclop.showImage(frame)
-    #        ard.packetExchange()
+            ard.packetExchange()
             time.sleep(sleepTime)
     except KeyboardInterrupt:
         cyclop.kill()
@@ -55,9 +60,9 @@ def kill():
 if __name__ == '__main__': #called from the command line
 
 
-#    ard = arduino.Arduino()
+    ard = arduino.Arduino()
     time.sleep(1) # wait for arduino to power up
-#    ard.connect(debug=True)
+    ard.connect(debug=True)
 
     run()
     time.sleep(100)

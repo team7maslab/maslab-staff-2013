@@ -12,16 +12,16 @@ class Eye:
     RED_HSV_MIN2 = cv.Scalar(167, 50, 50)
     RED_HSV_MAX2 = cv.Scalar(181, 256, 256)
     
-    GREEN_HSV_MIN = cv.Scalar(125, 60, 20)
-    GREEN_HSV_MAX = cv.Scalar(125, 250, 256)
-    GREEN_HSV_MIN2 = cv.Scalar(50, 60, 20)
-    GREEN_HSV_MAX2 = cv.Scalar(50, 250, 256)
+    GREEN_HSV_MIN = cv.Scalar(100, 50, 20)
+    GREEN_HSV_MAX = cv.Scalar(110, 255, 255)
+    GREEN_HSV_MIN2 = cv.Scalar(60, 50, 20)
+    GREEN_HSV_MAX2 = cv.Scalar(70, 255, 255)
     
     
     def __init__(self, debug=False):
         self.debug = debug
         if self.debug: print "Debugging mode for vision active"
-        self.camcapture = cv.CreateCameraCapture(0)
+        self.camcapture = cv.CreateCameraCapture(1)
     
     # fetches one frame from the camera
     def getFrame(self):
