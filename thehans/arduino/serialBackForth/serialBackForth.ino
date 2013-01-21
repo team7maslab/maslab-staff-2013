@@ -24,12 +24,12 @@
 #define killAll 'Z'      // 0 numbers follow
 
 // wheel motor indicies
-int pwm1 = 10;
+int pwm1 = 12;
 int dir1 = 11;
-int motorCurr1 = 12;
-int pwm2 = 13;
-int dir2 = 14;
-int motorCurr2 = 15;
+//int motorCurr1 = 12;
+int pwm2 = 10;
+int dir2 = 9;
+//int motorCurr2 = 15;
 
 // ball handling motor indicies
 int intakeInd = 53;
@@ -38,9 +38,9 @@ int helixInd = 51;
 int armInd = 50;
 
 // sensor indicies
-int ir1 = 1;
-int ir2 = 2;
-int ir3 = 3;
+int ir1 = A0;
+int ir2 = A1;
+int ir3 = A2;
 int bump1 = 4;
 int bump2 = 5;
 
@@ -51,6 +51,7 @@ int gameMode = 0;
 int leftSpeed = 0;
 int rightSpeed = 0;
 int maxSpeed = 0;
+int maxPower = 100;
   
 // ball counting
 int ballBump = 6;        // switch index counting the number of balls going up the helix
@@ -94,8 +95,8 @@ void setup(){
   pinMode(ir3, INPUT);
   pinMode(bump1, INPUT);
   pinMode(bump2, INPUT);
-  pinMode(motorCurr1, INPUT);
-  pinMode(motorCurr2, INPUT);
+ // pinMode(motorCurr1, INPUT);
+ // pinMode(motorCurr2, INPUT);
 
   Serial.begin(9600);
 }
@@ -153,7 +154,7 @@ void pid(int inputSpeed, int leftRight){
   // forward = 0, backward = 1, left = 2, right = 3
   // *********************************************************** PID controller goes here- just movement code right now
   
-  inputSpeed = (int) inputSpeed/9.0*255.0;
+  inputSpeed = (int) inputSpeed/9.0*maxPower;
   
   if (leftRight == 0){        // going forward
     leftSpeed += inputSpeed;
@@ -222,7 +223,7 @@ void moveRobot(){
   leftSpeed = abs(leftSpeed);
   rightSpeed = abs(rightSpeed);
   int maxValue;
-  if (leftSpeed > 255 || rightSpeed > 255){
+  if (leftSpeed > maxPower || rightSpeed > maxPower){
     if (leftSpeed > rightSpeed){
       maxValue = leftSpeed;
     }
@@ -231,33 +232,33 @@ void moveRobot(){
     }
   }
   else{
-    maxValue = 255;
+    maxValue = maxPower;
   }
 
-  Serial.print(leftSpeed);
-  Serial.print(" ");
-  Serial.println(rightSpeed);
-  Serial.println(maxValue);
+//  Serial.print(leftSpeed);
+//  Serial.print(" ");
+//  Serial.println(rightSpeed);
+//  Serial.println(maxValue);
   
-  leftSpeed = (int) (leftSpeed+0.0)/(maxValue+0.0)*255;
-  rightSpeed = (int) (rightSpeed+0.0)/(maxValue+0.0)*255;
+  leftSpeed = (int) (leftSpeed+0.0)/(maxValue+0.0)*maxPower;
+  rightSpeed = (int) (rightSpeed+0.0)/(maxValue+0.0)*maxPower;
   
   // send speed values to the motors
   analogWrite(pwm1, leftSpeed);
   analogWrite(pwm2, rightSpeed);
 
   if (leftNeg){
-    Serial.print(0-leftSpeed);
+    //Serial.print(0-leftSpeed);
   }
   else{
-    Serial.print(leftSpeed);
+    //Serial.print(leftSpeed);
   }
-  Serial.print(" ");
+  //Serial.print(" ");
   if (rightNeg){
-    Serial.println(0-rightSpeed);
+    //Serial.println(0-rightSpeed);
   }
   else{
-    Serial.println(rightSpeed);
+    //Serial.println(rightSpeed);
   }
 }
 
@@ -283,25 +284,31 @@ void armAction(){
 }
 
 void getIRData(){
-  writeToRetVal('I');
+  //writeToRetVal('I');
   ir1Val = analogRead(ir1);
   ir2Val = analogRead(ir2);
   ir3Val = analogRead(ir3);  
+  
+  Serial.print(ir1Val);
+  Serial.print(" ");
+  Serial.print(ir2Val);
+  Serial.print(" ");
+  Serial.println(ir3Val);
   
   // ********************************* need to make sure these chars are 3 digits
   // ********** put this back in
 //  writeToRetVal(ir1Val);
 //  writeToRetVal(ir2Val);
 //  writeToRetVal(ir3Val);
-  if (ir1Val > 375 || ir2Val > 375 || ir3Val > 375){
+  if (ir1Val > 400 || ir2Val > 400 || ir3Val > 400){
     leftSpeed = 0;
     rightSpeed = 0;
     pid(5,2);
     moveRobot();
-    if (ir1Val > 375){
+    if (ir1Val > 400){
       pid(5, 4);
     }
-    if (ir3Val > 375){
+    if (ir3Val > 400){
       pid(5, 3);
     }
   }
@@ -433,7 +440,7 @@ void loop(){
   getIRData();
 //  getBumpData();
   //checkNewBalls();
-//  sendData();
+  //sendData();
   
 //  boolean amIStuck = stuckDetect(); // stuck detection
   
