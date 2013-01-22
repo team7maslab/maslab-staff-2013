@@ -80,6 +80,10 @@ int irTOL = 50;          // tolerance for what values we'll call equal **** migh
 int currTOL = 10;        // tolerance for what values we'll call equal **** need to test to see what's reasonable **********
 int currHIGH = 50;       // values we'll call high current **** need to test to see what's reasonable*******
 
+boolean done = false;
+char in;
+int conflictDist = 400;
+
 // setup 
 void setup(){
   pinMode(pwm1, OUTPUT);
@@ -99,6 +103,9 @@ void setup(){
  // pinMode(motorCurr2, INPUT);
 
   Serial.begin(9600);
+  
+  pinMode(13, OUTPUT);
+  digitalWrite(13, HIGH);
 }
 
 // The dynamically sized return string
@@ -248,17 +255,22 @@ void moveRobot(){
   analogWrite(pwm2, rightSpeed);
 
   if (leftNeg){
-    //Serial.print(0-leftSpeed);
+    Serial.print("left wheel speed: ");
+    Serial.print(0-leftSpeed);
   }
   else{
-    //Serial.print(leftSpeed);
+    Serial.print("left wheel speed: ");
+    Serial.print(leftSpeed);
   }
-  //Serial.print(" ");
+  
+  Serial.print("    ");
   if (rightNeg){
-    //Serial.println(0-rightSpeed);
+    Serial.print("right wheel speed: ");
+    Serial.println(0-rightSpeed);
   }
   else{
-    //Serial.println(rightSpeed);
+    Serial.print("right wheel speed: ");
+    Serial.println(rightSpeed);
   }
 }
 
@@ -300,18 +312,24 @@ void getIRData(){
 //  writeToRetVal(ir1Val);
 //  writeToRetVal(ir2Val);
 //  writeToRetVal(ir3Val);
-  if (ir1Val > 400 || ir2Val > 400 || ir3Val > 400){
+/*  if (ir1Val > 400 || ir2Val > 400 || ir3Val > 400){
     leftSpeed = 0;
     rightSpeed = 0;
-    pid(5,2);
+    pid(5,1);
     moveRobot();
-    if (ir1Val > 400){
-      pid(5, 4);
-    }
-    if (ir3Val > 400){
+    delay(250);
+    if (ir2Val > conflictDist) {
+      Serial.println("center IR");
+    }      
+    if (ir1Val > conflictDist){
+      Serial.println("left IR");
       pid(5, 3);
     }
-  }
+    if (ir3Val > conflictDist){
+      Serial.println("right IR");
+      pid(5, 2);
+    }
+  }*/
 }
 
 void getBumpData(){
@@ -377,26 +395,30 @@ boolean stuckDetect(){
 }  
 
 void loop(){
-
   // ******* NEED TO SPECIFY WHEN THE GAME MODE IS RETURNED
-    
-  if (Serial.available() > 0){
+  Serial.print("IR data: ");
+  getIRData();
+//  Serial.print("avialable to read in: ");
+//  Serial.println(Serial.available());
+  if (Serial.available() > 1){
+
     //------------ READ IN ALL THE COMMMANDS -------------
     // Command packet format:
     // F5L2G1H1A1;
     // follows convention in the defines at the top
-    boolean done = false;
+    done = false;
     
-      // reset the speeds first
+     // reset the speeds first
     leftSpeed = 0;
     rightSpeed = 0;
     maxSpeed = 0;
 
-    while (!done){
-          
-        // Read in the first character, which tells us what to do
-        char in = serialRead();
-        
+    while (!done && (in = serialRead()) != NULL){
+         
+        //getBumpData();
+        //checkNewBalls();
+        //sendData();
+      
         // Performs actions based on the char read in
         switch(in){
           case killAll:
@@ -431,17 +453,18 @@ void loop(){
             break;
           case doneChar:
             done = true;
+            Serial.flush();
             break;
         }      
     }
     moveRobot();
+//    Serial.println("moveRobot");
   }
-  // read in sensor data
-  getIRData();
-//  getBumpData();
-  //checkNewBalls();
-  //sendData();
-  
+  else{
+    //Serial.println("nothing more to read in");
+  }
+  delay(1000);
+  // read in sensor data  
 //  boolean amIStuck = stuckDetect(); // stuck detection
   
 }
