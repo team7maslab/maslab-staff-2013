@@ -15,6 +15,8 @@ def run(state, ard):
     #    print mode
     #    time.sleep(.02) # check until mode is specified
 
+    wallTOL = 70
+
     runTime = 180
     stopTime = time.time() + runTime
     timeLeft = stopTime - time.time()
@@ -56,18 +58,32 @@ def run(state, ard):
                     ard.packetExchange()
 
                 # perpendicular to wall
-                elif (irVals[1] > 500 or irVals[1] > 500 or irVals[1] > 500):
+                elif (irVals[1] > 200 or irVals[1] > 220 or irVals[1] > 200):
                     ard.motorCommand(-0.5)
                     ard.turnCommand(0.5)
                     ard.packetExchange()
 
                 # we are parallel to a wall
-                elif (irVals[1] > 400 and irVals[2] < 200):
+                elif (irVals[1] > 250 and irVals[2] < 200):
                     wallOnSide = "left"
                     ard.motorCommand(0.5)
-                elif (irVals[3] > 400 and irVals[2] < 200):
+                    ard.packetExchange()
+                    
+                elif (irVals[3] > 250 and irVals[2] < 200):
                     wallOnSide = "right"
+                    ard.motorCommand(0.5)
+                    ard.packetExchange()
 
+                elif (wallOnSide == "left" and (250-irVals[1]) > wallTOL):
+                    ard.motorCommand(0.1)
+                    ard.turnCommand(-0.2)
+                    ard.packetExchange()
+                    
+                elif (wallOnSide == "right" and (250-irVals[3]) > wallTOL):
+                    ard.motorCommand(0.1)
+                    ard.turnCommand(0.2)
+                    ard.packetExchange()
+                                        
                 # need some PID control here
 
                 frame = cyclop.getFrame()
