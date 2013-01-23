@@ -24,25 +24,25 @@
 #define killAll 'Z'      // 0 numbers follow
 
 // wheel motor indicies
-int pwm1 = 12;
-int dir1 = 11;
+int pwm1 = 4;    // left
+int dir1 = 22;
 //int motorCurr1 = 12;
-int pwm2 = 10;
-int dir2 = 9;
+int pwm2 = 5;    // right
+int dir2 = 23;
 //int motorCurr2 = 15;
 
 // ball handling motor indicies
-int intakeInd = 53;
-int enemyRollerInd = 52;
-int helixInd = 51;
-int armInd = 50;
+int intakeInd = 6;
+int enemyRollerInd = 7;
+int helixInd = 8;
+int armInd = 10;
 
 // sensor indicies
-int ir1 = A0;
-int ir2 = A1;
-int ir3 = A2;
-int bump1 = 4;
-int bump2 = 5;
+int ir1 = A1;
+int ir2 = A2;
+int ir3 = A3;
+int bump1 = 27;
+int bump2 = 28;
 
 // tracking mode of the robot (0 = idle, 1 = passive opponent, 2 = active opponent)
 int gameMode = 0;
@@ -51,7 +51,7 @@ int gameMode = 0;
 int leftSpeed = 0;
 int rightSpeed = 0;
 int maxSpeed = 0;
-int maxPower = 100;
+int maxPower = 255;
   
 // ball counting
 int ballBump = 6;        // switch index counting the number of balls going up the helix
@@ -305,31 +305,7 @@ void getIRData(){
   Serial.print(" ");
   Serial.print(ir2Val);
   Serial.print(" ");
-  Serial.println(ir3Val);
-  
-  // ********************************* need to make sure these chars are 3 digits
-  // ********** put this back in
-//  writeToRetVal(ir1Val);
-//  writeToRetVal(ir2Val);
-//  writeToRetVal(ir3Val);
-/*  if (ir1Val > 400 || ir2Val > 400 || ir3Val > 400){
-    leftSpeed = 0;
-    rightSpeed = 0;
-    pid(5,1);
-    moveRobot();
-    delay(250);
-    if (ir2Val > conflictDist) {
-      Serial.println("center IR");
-    }      
-    if (ir1Val > conflictDist){
-      Serial.println("left IR");
-      pid(5, 3);
-    }
-    if (ir3Val > conflictDist){
-      Serial.println("right IR");
-      pid(5, 2);
-    }
-  }*/
+  Serial.println(ir3Val);  
 }
 
 void getBumpData(){
@@ -398,6 +374,7 @@ void loop(){
   // ******* NEED TO SPECIFY WHEN THE GAME MODE IS RETURNED
   Serial.print("IR data: ");
   getIRData();
+  getBumpData();
 //  Serial.print("avialable to read in: ");
 //  Serial.println(Serial.available());
   if (Serial.available() > 1){
@@ -414,8 +391,6 @@ void loop(){
     maxSpeed = 0;
 
     while (!done && (in = serialRead()) != NULL){
-         
-        //getBumpData();
         //checkNewBalls();
         //sendData();
       
@@ -458,12 +433,10 @@ void loop(){
         }      
     }
     moveRobot();
-//    Serial.println("moveRobot");
   }
-  else{
+  //else{
     //Serial.println("nothing more to read in");
-  }
-  delay(1000);
+  //}
   // read in sensor data  
 //  boolean amIStuck = stuckDetect(); // stuck detection
   
