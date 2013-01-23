@@ -108,23 +108,6 @@ void setup(){
   digitalWrite(13, HIGH);
 }
 
-// The dynamically sized return string
-String returnVal;
-
-// Helper function to keep track of retIndex and use it to write
-// a character to the correct location in the retVal array
-void writeToRetVal(String s){
-  returnVal.append(s);
-}
-
-// Helper function to end our retVal string with the ';' command
-// and a null character, and then to send the value in
-void sendData(){
-  returnVal.append(";");
-  Serial.print(returnVal);
-  Serial.flush();
-}
-
 // Loop until input is not -1 (which means no input was available)
 char serialRead(){
   char in;
@@ -245,7 +228,7 @@ void moveRobot(){
   // send speed values to the motors
   analogWrite(pwm1, leftSpeed);
   analogWrite(pwm2, rightSpeed);
-
+/*
   if (leftNeg){
     Serial.print("left wheel speed: ");
     Serial.print(0-leftSpeed);
@@ -264,6 +247,7 @@ void moveRobot(){
     Serial.print("right wheel speed: ");
     Serial.println(rightSpeed);
   }
+*/
 }
 
 void helixAction(){
@@ -288,7 +272,12 @@ void intakeAction(){
 
 void enemyHopperAction(){
   int onOff = readToInt();
-  analogWrite(enemyRollerInd, 255*onOff);
+  if (onOff == 1){
+    digitalWrite(enemyRollerInd, HIGH);
+  }
+  else{
+    digitalWrite(enemyRollerInd, LOW);
+  }
 }
 
 void armAction(){
@@ -307,22 +296,20 @@ void getIRData(){
 //  writeToRetVal(ir2Val);
 //  writeToRetVal(ir3Val); 
   
-  Serial.print("I");
-  Serial.print(ir1Val);
-//  Serial.print(" ");
-  Serial.print(ir2Val);
-//  Serial.print(" ");
-  Serial.print(ir3Val);  
+  Serial.write("I");
+  Serial.write(ir1Val);
+  Serial.write(ir2Val);
+  Serial.write(ir3Val);  
 }
 
 void getBumpData(){
-  writeToRetVal('U');
-  writeToRetVal(digitalRead(bump1));
-  writeToRetVal(digitalRead(bump2));
+  Serial.write('U');
+  Serial.write(digitalRead(bump1));
+  Serial.write(digitalRead(bump2));
 }
 
 void checkNewBalls(){
-  writeToRetVal('K');
+  Serial.write('K');
   
   currBumpVal = digitalRead(ballBump);
   
@@ -331,12 +318,12 @@ void checkNewBalls(){
     int ballType;
     // label ballType as ours (1) or opponent's (0)
     if (ballType == 1){
-      writeToRetVal(1);
-      writeToRetVal(0);
+      Serial.write(1);
+      Serial.write(0);
     }
     else{
-      writeToRetVal(0);
-      writeToRetVal(1);
+      Serial.write(0);
+      Serial.write(1);
     }
   prevBumpVal = currBumpVal;
   }
@@ -380,7 +367,7 @@ boolean stuckDetect(){
 void loop(){
   // ******* NEED TO SPECIFY WHEN THE GAME MODE IS RETURNED
 //  Serial.print("IR data: ");
-  getIRData();
+//  getIRData();
 //  getBumpData();
 //  Serial.print("avialable to read in: ");
 //  Serial.println(Serial.available());
@@ -442,8 +429,10 @@ void loop(){
     moveRobot();
   }
   delay(500);
-
-  sendData();
+  Serial.flush();
+  Serial.write("hello");
+  Serial.write(";");    // ends a chunk of communications data
+  Serial.flush();
   //else{
     //Serial.println("nothing more to read in");
   //}
