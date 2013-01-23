@@ -38,6 +38,7 @@ def run(state, ard):
 
             irVals = ard.retrieve("I")
             bumpVals = ard.retrieve("U")
+            print irVals
 
             wallOnSide = "none"
 

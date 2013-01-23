@@ -3,7 +3,7 @@ import time, eye, random, sys
 
 def run():
 
-    findColor = "green"
+    findColor = "cyan"
     
     #Waiting for button press on robot to denote start
     # need to add button press into the code

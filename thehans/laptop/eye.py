@@ -32,10 +32,10 @@ class Eye:
 ##    CYAN_HSV_MIN2 = cv.Scalar(140, 60, 50)
 ##    CYAN_HSV_MAX2 = cv.Scalar(165, 255, 255)    
 
-    CYAN_HSV_MIN = cv.Scalar(70, 70, 50)
-    CYAN_HSV_MAX = cv.Scalar(75, 256, 256)
-    CYAN_HSV_MIN2 = cv.Scalar(160, 60, 50)
-    CYAN_HSV_MAX2 = cv.Scalar(165, 255, 255)    
+    CYAN_HSV_MIN = cv.Scalar(95, 176, 115)
+    CYAN_HSV_MAX = cv.Scalar(108, 255, 255)
+    CYAN_HSV_MIN2 = cv.Scalar(120, 176, 115)
+    CYAN_HSV_MAX2 = cv.Scalar(125, 255, 255)    
     
     def __init__(self, debug=False):
         self.debug = debug

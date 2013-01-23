@@ -16,7 +16,7 @@
 //#define mode 'M'         // 0 = idle, 1 = passive opponent, 2 = aggressive       ************ need to use this at some point
 #define ir 'I'           // 3 3-digit numbers follow- one number for each IR
                          // IR values are scaled by Arduino- high = close, low = far
-#define bump 'U'         // x numbers (0 or 1) follow ***** need to specify how many bump sensors there are
+#define bump 'U'         // 2 numbers (0 or 1) follow for the values of 2 bump sensors
 #define balls 'K'        // 2 numbers follow (0 or 1)
                          // +1 to our balls in hopper, +1 to enemy balls in hopper
 
@@ -109,23 +109,20 @@ void setup(){
 }
 
 // The dynamically sized return string
-char* retVal;
-int retIndex;
+String returnVal;
 
 // Helper function to keep track of retIndex and use it to write
 // a character to the correct location in the retVal array
-void writeToRetVal(char c){
-  retVal[retIndex] = c;
-  retIndex++;
+void writeToRetVal(String s){
+  returnVal.append(s);
 }
 
 // Helper function to end our retVal string with the ';' command
 // and a null character, and then to send the value in
 void sendData(){
-  retVal[retIndex] = ';';
-  retVal[retIndex+1] = 0;
+  returnVal.append(";");
+  Serial.print(returnVal);
   Serial.flush();
-  retIndex = 0;
 }
 
 // Loop until input is not -1 (which means no input was available)
@@ -242,11 +239,6 @@ void moveRobot(){
     maxValue = maxPower;
   }
 
-//  Serial.print(leftSpeed);
-//  Serial.print(" ");
-//  Serial.println(rightSpeed);
-//  Serial.println(maxValue);
-  
   leftSpeed = (int) (leftSpeed+0.0)/(maxValue+0.0)*maxPower;
   rightSpeed = (int) (rightSpeed+0.0)/(maxValue+0.0)*maxPower;
   
@@ -276,12 +268,22 @@ void moveRobot(){
 
 void helixAction(){
   int onOff = readToInt();
-  analogWrite(helixInd, 255*onOff);
+  if (onOff == 1){
+    digitalWrite(helixInd, HIGH);
+  }
+  else{
+    digitalWrite(helixInd, LOW);
+  }
 }
 
 void intakeAction(){
   int onOff = readToInt();
-  analogWrite(intakeInd, 255*onOff);
+  if (onOff == 1){
+    digitalWrite(intakeInd, HIGH);
+  }
+  else{
+    digitalWrite(intakeInd, LOW);
+  }
 }
 
 void enemyHopperAction(){
@@ -296,16 +298,21 @@ void armAction(){
 }
 
 void getIRData(){
-  //writeToRetVal('I');
+//  writeToRetVal('I');  
   ir1Val = analogRead(ir1);
   ir2Val = analogRead(ir2);
   ir3Val = analogRead(ir3);  
   
+//  writeToRetVal(ir1Val);
+//  writeToRetVal(ir2Val);
+//  writeToRetVal(ir3Val); 
+  
+  Serial.print("I");
   Serial.print(ir1Val);
-  Serial.print(" ");
+//  Serial.print(" ");
   Serial.print(ir2Val);
-  Serial.print(" ");
-  Serial.println(ir3Val);  
+//  Serial.print(" ");
+  Serial.print(ir3Val);  
 }
 
 void getBumpData(){
@@ -372,9 +379,9 @@ boolean stuckDetect(){
 
 void loop(){
   // ******* NEED TO SPECIFY WHEN THE GAME MODE IS RETURNED
-  Serial.print("IR data: ");
+//  Serial.print("IR data: ");
   getIRData();
-  getBumpData();
+//  getBumpData();
 //  Serial.print("avialable to read in: ");
 //  Serial.println(Serial.available());
   if (Serial.available() > 1){
@@ -434,6 +441,9 @@ void loop(){
     }
     moveRobot();
   }
+  delay(500);
+
+  sendData();
   //else{
     //Serial.println("nothing more to read in");
   //}
