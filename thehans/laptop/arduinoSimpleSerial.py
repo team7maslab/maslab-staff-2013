@@ -8,7 +8,7 @@ class Arduino:
         self.dataSent = False
         self.outputDict = {}
         self.receivedDict = {}
-        self.dataFMT = {'M':(1,1),'K':(2,2)}
+        self.dataFMT = {'M':(1,1),'K':(2,2), 'I':(3,3), 'U':(4,4), 'Z':(5,5)}
         self.debug = False
         self.packetCount = 0
         
