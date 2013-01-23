@@ -16,12 +16,21 @@ class Eye:
     GREEN_HSV_MAX = cv.Scalar(110, 255, 255)
     GREEN_HSV_MIN2 = cv.Scalar(60, 50, 20)
     GREEN_HSV_MAX2 = cv.Scalar(70, 255, 255)
-    
+
+    YELLOW_HSV_MIN = cv.Scalar(20, 100, 100)
+    YELLOW_HSV_MAX = cv.Scalar(30, 255, 255)
+    YELLOW_HSV_MIN2 = cv.Scalar(35, 100, 100)
+    YELLOW_HSV_MAX2 = cv.Scalar(31, 255, 255)
+
+    PURPLE_HSV_MIN = cv.Scalar(200, 50, 70)
+    PURPLE_HSV_MAX = cv.Scalar(205, 255, 255)
+    PURPLE_HSV_MIN2 = cv.Scalar(215, 50, 70)
+    PURPLE_HSV_MAX2 = cv.Scalar(216, 255, 255)
     
     def __init__(self, debug=False):
         self.debug = debug
         if self.debug: print "Debugging mode for vision active"
-        self.camcapture = cv.CreateCameraCapture(0)
+        self.camcapture = cv.CreateCameraCapture(1)
     
     # fetches one frame from the camera
     def getFrame(self):
@@ -110,7 +119,73 @@ class Eye:
         if self.debug: print "Relative Center is: " + str(relativeCenter)
 
         return relativeCenter, thresholded
-    
+
+    # fetch the coordinates of the yellow wall relative to the center and the frame
+    def findYellowWall(self, frame):
+        """takes in a frame capture of the camera and returns a thresholded frame"""
+        
+        size = cv.GetSize(frame)
+        hsv_frame = cv.CreateImage(size, cv.IPL_DEPTH_8U, 3)
+        thresholded = cv.CreateImage(size, cv.IPL_DEPTH_8U, 1)
+        thresholded2 = cv.CreateImage(size, cv.IPL_DEPTH_8U, 1)
+        cv.CvtColor(frame, hsv_frame, cv.CV_BGR2HSV)
+        cv.InRangeS(hsv_frame, self.YELLOW_HSV_MIN, self.YELLOW_HSV_MAX, thresholded)
+        cv.InRangeS(hsv_frame, self.YELLOW_HSV_MIN2, self.YELLOW_HSV_MAX2, thresholded2)
+        cv.Or(thresholded, thresholded2, thresholded)
+        
+        # calculate the center and the radius based on the moment
+        mat = cv.GetMat(thresholded)
+        mm=cv.Moments(mat)
+        if mm.m00 > 0:
+            x = int(mm.m10/mm.m00)
+            y = int(mm.m01/mm.m00)
+        else:
+            # red ball not found. will implement method later.
+            x = 0
+            y = 0
+        center = (x,y)
+        
+        if self.debug: print "Center of yellow moment is: " + str(center)
+        relativeCenterX = (float(x)-float(self.FRAME_WIDTH)/2) / (float(self.FRAME_WIDTH)/2)
+        relativeCenterY = (float(y)-float(self.FRAME_HEIGHT)/2) / (float(self.FRAME_HEIGHT)/2)
+        relativeCenter = (relativeCenterX, relativeCenterY)
+        if self.debug: print "Relative Center is: " + str(relativeCenter)
+
+        return relativeCenter, thresholded
+
+    # fetch the coordinates of the yellow wall relative to the center and the frame
+    def findPurpleTower(self, frame):
+        """takes in a frame capture of the camera and returns a thresholded frame"""
+        
+        size = cv.GetSize(frame)
+        hsv_frame = cv.CreateImage(size, cv.IPL_DEPTH_8U, 3)
+        thresholded = cv.CreateImage(size, cv.IPL_DEPTH_8U, 1)
+        thresholded2 = cv.CreateImage(size, cv.IPL_DEPTH_8U, 1)
+        cv.CvtColor(frame, hsv_frame, cv.CV_BGR2HSV)
+        cv.InRangeS(hsv_frame, self.PURPLE_HSV_MIN, self.PURPLE_HSV_MAX, thresholded)
+        cv.InRangeS(hsv_frame, self.PURPLE_HSV_MIN2, self.PURPLE_HSV_MAX2, thresholded2)
+        cv.Or(thresholded, thresholded2, thresholded)
+        
+        # calculate the center and the radius based on the moment
+        mat = cv.GetMat(thresholded)
+        mm=cv.Moments(mat)
+        if mm.m00 > 0:
+            x = int(mm.m10/mm.m00)
+            y = int(mm.m01/mm.m00)
+        else:
+            # red ball not found. will implement method later.
+            x = 0
+            y = 0
+        center = (x,y)
+        
+        if self.debug: print "Center of yellow moment is: " + str(center)
+        relativeCenterX = (float(x)-float(self.FRAME_WIDTH)/2) / (float(self.FRAME_WIDTH)/2)
+        relativeCenterY = (float(y)-float(self.FRAME_HEIGHT)/2) / (float(self.FRAME_HEIGHT)/2)
+        relativeCenter = (relativeCenterX, relativeCenterY)
+        if self.debug: print "Relative Center is: " + str(relativeCenter)
+
+        return relativeCenter, thresholded
+
     # opens a new window with the image
     def showImage(self, frame):
         """debugging tool for outputting the frame as a new window"""
