@@ -3,7 +3,7 @@ import time, eye, random, sys
 
 def run():
 
-    findColor = "cyan"
+    findColor = "red and green"
     
     #Waiting for button press on robot to denote start
     # need to add button press into the code
@@ -23,16 +23,17 @@ def run():
     try:
         while True:
             frame = cyclop.getFrame()
-            if (findColor == "green"):
-                (x,y), frame = cyclop.findGreenBall(frame)
-            elif (findColor == "yellow"):
-                (x,y), frame = cyclop.findYellowWall(frame)
-            elif (findColor == "purple"):
-                (x,y), frame = cyclop.findPurpleTower(frame)
-            elif (findColor == "red"):
-                (x,y), frame = cyclop.findRedBall(frame)
-            elif (findColor == "cyan"):
-                (x,y), frame = cyclop.findCyanButton(frame)
+            (x,y), frame, radius = cyclop.findColor(frame, findColor)
+##            if (findColor == "green"):
+##                (x,y), frame = cyclop.findGreenBall(frame)
+##            elif (findColor == "yellow"):
+##                (x,y), frame = cyclop.findYellowWall(frame)
+##            elif (findColor == "purple"):
+##                (x,y), frame = cyclop.findPurpleTower(frame)
+##            elif (findColor == "red"):
+##                (x,y), frame = cyclop.findRedBall(frame)
+##            elif (findColor == "cyan"):
+##                (x,y), frame = cyclop.findCyanButton(frame)
 
 ##            if (x == 0 and y == 0):      # no ball found
 ##                # wander until you find a ball
