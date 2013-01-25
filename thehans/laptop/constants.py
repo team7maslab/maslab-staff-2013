@@ -2,10 +2,8 @@
 # constants to be used by the laptop portion of MASLab control code
 
 # motor parameters
-cruiseL = 0.5;      # initial left motor speed
-cruiseR = 0.5;      # initial right motor speed
-butPressL = 0.2;    # left motor speed for pressing button
-butPressR = 0.2;    # right motor speed for pressing button
+defaultSpeed = 0.5;      # initial left motor speed
+ninetyDegTurn = 0.3;     # causes a 90 degree turn in 0.5 seconds
 
 # time parameters
 gameTime = 180;     # 3-minute game period
