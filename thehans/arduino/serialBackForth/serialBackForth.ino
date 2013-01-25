@@ -228,7 +228,7 @@ void moveRobot(){
   // send speed values to the motors
   analogWrite(pwm1, leftSpeed);
   analogWrite(pwm2, rightSpeed);
-/*
+
   if (leftNeg){
     Serial.print("left wheel speed: ");
     Serial.print(0-leftSpeed);
@@ -247,7 +247,7 @@ void moveRobot(){
     Serial.print("right wheel speed: ");
     Serial.println(rightSpeed);
   }
-*/
+
 }
 
 void helixAction(){
@@ -429,10 +429,6 @@ void loop(){
     moveRobot();
   }
   delay(500);
-  Serial.flush();
-  Serial.write("hello");
-  Serial.write(";");    // ends a chunk of communications data
-  Serial.flush();
   //else{
     //Serial.println("nothing more to read in");
   //}
