@@ -1,6 +1,5 @@
 import math, Image
 import cv2.cv as cv
-import numpy
 
 class Eye:
 
