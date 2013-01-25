@@ -1,47 +1,57 @@
 # virtualBot.py
 # tests robot behaviors for MASLab 2013
+# clones most of arduinoSimpleSerial.py methods into a form that doesn't interact with Arduino
 
-import random
+import random, math
 
 class VirtualBot:
-    motion = "stopped"
-    arm = "up"
-    enemyRoller = "off"
-    ourBallsLeft = 8
-    theirBallsLeft = 4
-    maxBalls = 12
 
-    def collision(self):
-        collideProb = random.randrange(1,10)
-        if (collideProb > 7):
-            print "collision"
-            print "avoiding..."
-            return True
+    def __init__ (self):
+        self.returnVal = ""
+
+    def packetExchange(self, query = False):
+        returnVal += ";"
+        print self.returnVal
+        self.returnVal = ""
+
+    def motorCommand(self, speed):
+        if speed >= 0:
+            self.returnVal += ("F" + str(int(min(math.fabs(speed*10),9))))
         else:
-            return False
+            self.returnVal += ("B" + str(int(min(math.fabs(speed*10),9))))
 
-    def ballFound(self):
-        findProb = ((self.ourBallsLeft+self.theirBallsLeft)/self.maxBalls)*0.5
-        if (random.random() < findProb):
-            print "found a ball"
-            return True
+    def turnCommand(self, heading):
+        if heading >= 0:
+            self.returnVal += ("R" + str(int(min(math.fabs(heading*10),9))))
         else:
-            return False
+            self.returnVal += ("L" + str(int(min(math.fabs(heading*10),9))))
 
-    def getBalls(self):
-        ourBalls = min(random.randrange(0,3), self.ourBallsLeft)
-        theirBalls = min(random.randrange(0,2), self.theirBallsLeft)
+    def helixCommand(self, mode):
+        self.returnVal += ("H" + str(mode))
 
-        self.ourBallsLeft -= ourBalls
-        self.theirBallsLeft -= theirBalls
-        self.maxBalls -= (ourBalls + theirBalls)
-        
-        print "got ", ourBalls, "of our balls"
-        print "got ", theirBalls, "of their balls"
-        return [ourBalls, theirBalls]
+    def intakeCommand(self, mode):
+        self.returnVal += ("G" + str(mode))
 
-    def scoreTower(self):
-        print "scoring at tower"
+    def armCommand(self, mode):
+        self.returnVal += ("A" + str(mode))
 
-    def scoreWall(self):
-        print "scoring at wall"
+    def enemyCommand(self, mode):
+        self.returnVal += ("E" + str(mode))
+
+    def armCommand(self, mode):
+        self.returnVal += ("A" + str(mode))
+
+    def startCommand(self, mode):
+        self.helixCommand(1)
+        self.intakeCommand(1)
+        self.armCommand(0)
+        self.enemyCommand(0)
+
+    def kill(self):
+        self.helixCommand(0)
+        self.intakeCommand(0)
+        self.armCommand(0)
+        self.enemyCommand(0)
+        self.motorCommand(0)
+        self.turnCommand(0)
+        print "end"
