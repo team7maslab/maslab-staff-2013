@@ -13,23 +13,18 @@ class Eye:
     RED_HSV_MIN2 = cv.Scalar(167, 50, 50)
     RED_HSV_MAX2 = cv.Scalar(181, 256, 256)
     
-    GREEN_HSV_MIN = cv.Scalar(100, 50, 20)
-    GREEN_HSV_MAX = cv.Scalar(110, 255, 255)
-    GREEN_HSV_MIN2 = cv.Scalar(60, 50, 20)
-    GREEN_HSV_MAX2 = cv.Scalar(70, 255, 255)
-##
-##    GREEN_HSV_MIN = cv.Scalar(140, 80, 0)
-##    GREEN_HSV_MAX = cv.Scalar(145, 55, 255)
-##    GREEN_HSV_MIN2 = cv.Scalar(60, 120, 0)
-##    GREEN_HSV_MAX2 = cv.Scalar(65, 125, 255)
+    GREEN_HSV_MIN = cv.Scalar(140, 80, 0)
+    GREEN_HSV_MAX = cv.Scalar(145, 55, 255)
+    GREEN_HSV_MIN2 = cv.Scalar(50, 50, 20)
+    GREEN_HSV_MAX2 = cv.Scalar(80, 255, 255)
 
-    YELLOW_HSV_MIN = cv.Scalar(20, 100, 100)
-    YELLOW_HSV_MAX = cv.Scalar(30, 255, 255)
+    YELLOW_HSV_MIN = cv.Scalar(24, 100, 100)
+    YELLOW_HSV_MAX = cv.Scalar(37, 255, 255)
     YELLOW_HSV_MIN2 = cv.Scalar(35, 100, 100)
     YELLOW_HSV_MAX2 = cv.Scalar(31, 255, 255)
 
-    PURPLE_HSV_MIN = cv.Scalar(200, 50, 70)
-    PURPLE_HSV_MAX = cv.Scalar(205, 255, 255)
+    PURPLE_HSV_MIN = cv.Scalar(121, 50, 70)
+    PURPLE_HSV_MAX = cv.Scalar(135, 255, 255)
     PURPLE_HSV_MIN2 = cv.Scalar(215, 50, 70)
     PURPLE_HSV_MAX2 = cv.Scalar(216, 255, 255)
 
