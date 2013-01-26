@@ -63,42 +63,8 @@ def run(state, ard, nav):
             
             if (currentState == "wallFollow"):
                 # need to be able to get IR values
+                navigation.wallFollow(ard)
                 
-                # not near wall
-##                if (irVals[1] < 200 or irVals[2] < 200 or irVals[3] < 200):
-##                    wallOnSide = "none"
-##                    ard.motorCommand(0.5)
-##                    ard.packetExchange()
-##
-##                # perpendicular to wall
-##                elif (irVals[1] > 200 or irVals[1] > 220 or irVals[1] > 200):
-##                    ard.motorCommand(-0.5)
-##                    ard.turnCommand(0.5)
-##                    ard.packetExchange()
-##
-##                # we are parallel to a wall
-##                elif (irVals[1] > 250 and irVals[2] < 200):
-##                    wallOnSide = "left"
-##                    ard.motorCommand(0.5)
-##                    ard.packetExchange()
-##                    
-##                elif (irVals[3] > 250 and irVals[2] < 200):
-##                    wallOnSide = "right"
-##                    ard.motorCommand(0.5)
-##                    ard.packetExchange()
-##
-##                elif (wallOnSide == "left" and (250-irVals[1]) > wallTOL):
-##                    ard.motorCommand(0.1)
-##                    ard.turnCommand(-0.2)
-##                    ard.packetExchange()
-##                    
-##                elif (wallOnSide == "right" and (250-irVals[3]) > wallTOL):
-##                    ard.motorCommand(0.1)
-##                    ard.turnCommand(0.2)
-##                    ard.packetExchange()
-                time.sleep(0.5)                                   
-                # need some PID control here
-
                 (x,y), frame, radius = cyclop.findColor(frame, findColor)
                 if (x != -1.0 and y != -1.0):
                     state.ballFound = True
