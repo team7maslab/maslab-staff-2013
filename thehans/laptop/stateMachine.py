@@ -21,11 +21,7 @@ class State:
         self.ballFound = False
         self.prevState = "start"
         self.stopTime = 0
-
-        # virtualBot
-#        bot = virtualBot.VirtualBot()
-        virtual = False
-    
+   
 # need some kind of auto timeout
 
     def nextState(self, stopTime):

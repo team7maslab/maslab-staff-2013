@@ -18,9 +18,9 @@ speedKp = 0.1;
 angleKp = 0.1;
 
 # space clearance values
-centerClear;        # enough space in front to continue forward
-sideClear;          # enough space on sides to consider allClear
-tooClose;           # correction threshold for wall following
-tooFar;             # correction threshold for wall following
+centerClear = 200;        # enough space in front to continue forward
+sideClear = 250;          # enough space on sides to consider allClear
+tooClose = 100;           # correction threshold for wall following
+tooFar = 200;             # correction threshold for wall following
 
 # tooClose < tooFar < sideClear
