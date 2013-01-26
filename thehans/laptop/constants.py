@@ -10,15 +10,17 @@ gameTime = 180;     # 3-minute game period
 endGame = 150;      # end game entered when there are 30 seconds left in the game
 buttonDelay = 30;   # delay between button presses
 butPressTime = 0.5; # ??? time required for a button press
-pidTimeStep = 0.1;  # time step used in PID control
+step = 0.1;         # time step used for forward/
 
 # controller gains
 ##### need to calibrate all these
 speedKp = 0.1;
-speedKi = 0.1;
-speedKd = 0.1;
 angleKp = 0.1;
-angleKi = 0.1;
-angleKd = 0.1;
-trackingKp = 0.1;
 
+# space clearance values
+centerClear;        # enough space in front to continue forward
+sideClear;          # enough space on sides to consider allClear
+tooClose;           # correction threshold for wall following
+tooFar;             # correction threshold for wall following
+
+# tooClose < tooFar < sideClear
