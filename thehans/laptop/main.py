@@ -23,10 +23,7 @@ def run(state, ard, nav):
     timeLeft = stopTime - time.time()
     state.stopTime = stopTime
     state.nextState(stopTime)
-
-    # need to calibrate for full turn
-    turnEncCount = 120
-    
+   
     cyclop = eye.Eye(debug=True)
    
     try:
@@ -50,16 +47,9 @@ def run(state, ard, nav):
             # check for collsions
 
 
-##            if (bumpVals[1] == 1 or bumpVals[2] == 1 or irVals[1] > 500 or irVals[2] > 500 or irVals[3] > 500):
-##                nav.backUpFromHit(ard)
-
-
-##                ard.motorCommand(-0.5)
-##                ard.turnCommand(-0.5)
-##                ard.packetExchange()
-##                ard.motorCommand(-0.5)
-##                ard.turnCommand(0.5)
-##                ard.packetExchange()
+            if (bumpVals[1] == 1 or bumpVals[2] == 1 or irVals[1] > 500 or irVals[2] > 500 or irVals[3] > 500):
+                self.searching = True
+                nav.backUpFromHit(ard)
             
             if (currentState == "wallFollow"):
                 # need to be able to get IR values
@@ -74,21 +64,14 @@ def run(state, ard, nav):
                 state.prevState = "wallFollow"
                 
             elif (currentState == "explore"):
-                
                 (x,y), frame, radius = cyclop.findColor(frame, findColor)
 
                 # if no ball is found- turn around
                 ##### need to make this go to furthest area
                 if (x == -1.0 and y == -1.0):
                     state.ballFound = False
-                    ard.turnCommand(constants.ninetyDegTurn)
-                    time.sleep(0.1)
-                    turnEncCount += 1
-                    if (turnEncCount == 120):
-                        ard.motorCommand(constants.defaultSpeed)
-                        time.sleep(2)
-                        turnEncCount = 0
-
+                    nav.explore(arduino, IRdata, self.searching, self.angleLeft)
+                        
                 else:
                     state.ballFound = True
 
