@@ -1,7 +1,6 @@
 # stateMachine.py
 # state machine code for 2013 Maslab Team 7
 
-import arduinoSimpleSerial as arduino
 import time, eye, random, sys, virtualBot
 
 class State:
