@@ -10,7 +10,7 @@ class VirtualBot:
         self.returnVal = ""
 
     def packetExchange(self, query = False):
-        returnVal += ";"
+        self.returnVal += ";"
         print self.returnVal
         self.returnVal = ""
 
