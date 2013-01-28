@@ -9,7 +9,7 @@ gameTime = 180     # 3-minute game period
 endGame = 30       # end game entered when there are 30 seconds left in the game
 buttonDelay = 30   # delay between button presses
 butPressTime = 0.5 # ??? time required for a button press
-step = 0.1         # time step used for forward/
+step = 0.1         # time step used for movement
 
 # controller gains
 ##### need to calibrate this
@@ -33,6 +33,9 @@ maxBalls = 10
 
 buttonDelay = 30
 
+# TODO - need to check the actual value of these
 towerFoundThresh = 15
 towerCloseThresh = 25
+timeFor90DegTurn = 0.5
 
+ir_max = [89., 131., 167., 94.] # for IR calibration
