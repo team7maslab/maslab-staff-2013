@@ -1,7 +1,7 @@
 // pins 2 and 4 on the Mega don't work
 
 // motor stuff
-int pwm1 = 11;
+int pwm1 = 8;
 int dir1 = 12;
 int pwm2 = 13;
 int dir2 = 10;
@@ -16,12 +16,16 @@ int on = 1;
 
 void setup()
 {
-  pinMode(pwm1, OUTPUT);
+//  pinMode(pwm1, OUTPUT);
   pinMode(pwm2, OUTPUT);
   pinMode(dir1, OUTPUT);
   pinMode(dir2, OUTPUT);
   pinMode(ir, INPUT);
   Serial.begin(9600);
+//  pinMode(8, OUTPUT);
+//  analogWrite(8, 255);
+  pinMode(5, OUTPUT);
+  analogWrite(5, 255);
 }
 
 int forward(int time) {
@@ -71,7 +75,8 @@ int avoidWall() {
 
 void loop()
 {
-  forward(100);
-  avoidWall();
-  Serial.println(analogRead(ir));
+//  analogWrite(8, 255);
+//  forward(100);
+//  avoidWall();
+//  Serial.println(analogRead(ir));
 }
