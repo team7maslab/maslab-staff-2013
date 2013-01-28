@@ -99,8 +99,8 @@ class Eye:
         center = (x,y)
         radius = int(math.sqrt(mm.m00/math.pi)/16)
         
-        # temporarily disable validball checker - check if ball is valid
-        if (radius > 10):
+        # validball checker
+        if (radius > valid):
             cv.Circle(thresholded, center, radius, self.VICTOR_ORANGE, 5)
         
         # calculate the relative position of the ball with 0,0 being the center of the frame. tuple of values between -1 and 1
